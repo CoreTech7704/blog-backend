@@ -19,7 +19,7 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    prfileImageURL: {
+    profileImageURL: {
       type: String,
       default: "/images/default.jpg",
     },
@@ -32,19 +32,40 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
-userSchema.pre("save", function (next) {
-  const user = this;
-  if (!user.isModified("password")) {
-    return;
-  }
+// Hash password before saving
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
 
-  const salt = randomBytes(16).toString();
-const hashedPassword = createHmac("sha256", salt)
-  .update(user.password)
-  .digest("hex");
+  const salt = randomBytes(16).toString("hex");
+  const hashedPassword = createHmac("sha256", salt)
+    .update(this.password)
+    .digest("hex");
+
   this.salt = salt;
   this.password = hashedPassword;
 });
+
+// Static method to match password
+userSchema.statics.matchPassword = async function (email, password) {
+  const user = await this.findOne({ email });
+  if (!user || !user.salt) {
+    throw new Error("Invalid credentials");
+  }
+
+  const hashedInput = createHmac("sha256", user.salt)
+    .update(password)
+    .digest("hex");
+
+  if (hashedInput !== user.password) {
+    throw new Error("Invalid credentials");
+  }
+
+  const userObj = user.toObject();
+  delete userObj.password;
+  delete userObj.salt;
+
+  return userObj;
+};
 
 const User = model("User", userSchema);
 module.exports = User;

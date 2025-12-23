@@ -1,10 +1,10 @@
 const { Router } = require("express");
-const { createHmac } = require("crypto");
 const User = require("../models/user");
 
 const router = Router();
 
-// SIGNIN
+/* ================= SIGN IN ================= */
+
 router.get("/signin", (req, res) => {
   res.render("signin", {
     error: req.query.error || null,
@@ -15,27 +15,22 @@ router.post("/signin", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      return res.redirect("/user/signin?error=Invalid credentials");
-    }
+    const user = await User.matchPassword(
+      email.toLowerCase(),
+      password
+    );
 
-    const hashedPassword = createHmac("sha256", user.salt)
-      .update(password)
-      .digest("hex");
-
-    if (hashedPassword !== user.password) {
-      return res.redirect("/user/signin?error=Invalid credentials");
-    }
-
+    // req.session.user = user; // later
     return res.redirect("/");
   } catch (err) {
-    console.error(err);
-    return res.redirect("/user/signin?error=Something went wrong");
+    console.error("Signin error:", err.message);
+    return res.redirect("/user/signin?error=Invalid email or password");
   }
 });
 
-//SIGNUP
+
+/* ================= SIGN UP ================= */
+
 router.get("/signup", (req, res) => {
   res.render("signup", {
     error: req.query.error || null,
