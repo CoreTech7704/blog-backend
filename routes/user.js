@@ -2,27 +2,10 @@ const { Router } = require("express");
 const { body, validationResult } = require("express-validator");
 const User = require("../models/user");
 const rateLimit = require("express-rate-limit");
+const requireAuth = require("../middleware/requireAuth");
+const { loginLimiter, signupLimiter } = require("../middleware/rateLimit");
 
 const router = Router();
-
-/* ================= LIMITERS ================= */
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-});
-
-const signupLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-});
-
-/* ================= AUTH MIDDLEWARE ================= */
-function requireAuth(req, res, next) {
-  if (!req.session.user) {
-    return res.redirect("/user/signin");
-  }
-  next();
-}
 
 /* ================= SIGN IN ================= */
 router.get("/signin", (req, res) => {
@@ -32,7 +15,7 @@ router.get("/signin", (req, res) => {
 router.post("/signin", loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.matchPassword(email, password);
+    const user = await User.matchPassword(email.toLowerCase(), password);
 
     req.session.user = {
       _id: user._id,
@@ -52,9 +35,7 @@ router.get("/signup", (req, res) => {
   res.render("signup", { error: req.query.error || null });
 });
 
-router.post(
-  "/signup",
-  signupLimiter,
+router.post("/signup", signupLimiter,
   [
     body("email").isEmail(),
     body("password").isLength({ min: 8 }),
@@ -69,12 +50,20 @@ router.post(
     try {
       const { fullname, email, password } = req.body;
 
-      const existingUser = await User.findOne({ email });
+      const existingUser = await User.findOne({
+        email: email.toLowerCase(),
+      });
+
       if (existingUser) {
         return res.redirect("/user/signup?error=Email already in use");
       }
 
-      await User.create({ fullname, email, password });
+      await User.create({
+        fullname,
+        email: email.toLowerCase(),
+        password,
+      });
+
       res.redirect("/user/signin");
     } catch (err) {
       console.error(err);
@@ -83,9 +72,11 @@ router.post(
   }
 );
 
+
 /* ================= LOGOUT ================= */
 router.post("/logout", (req, res) => {
   req.session.destroy(() => {
+    res.clearCookie("connect.sid");
     res.redirect("/user/signin");
   });
 });

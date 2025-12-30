@@ -1,16 +1,9 @@
 const { Router } = require("express");
 const Blog = require("../models/blog");
 const upload = require("../middleware/upload");
+const requireAuth = require("../middleware/requireAuth");
 
 const router = Router();
-
-/* ================= AUTH MIDDLEWARE ================= */
-function requireAuth(req, res, next) {
-  if (!req.session.user) {
-    return res.redirect("/user/signin");
-  }
-  next();
-}
 
 /* ================= NEW BLOG FORM ================= */
 router.get("/new", requireAuth, (req, res) => {
