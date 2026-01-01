@@ -20,6 +20,8 @@ router.post("/signin", loginLimiter, async (req, res) => {
       _id: user._id,
       role: user.role,
       fullname: user.fullname,
+      email: user.email,
+      createdAt: user.createdAt,
     };
 
     res.redirect("/");
@@ -34,7 +36,9 @@ router.get("/signup", (req, res) => {
   res.render("signup", { error: req.query.error || null });
 });
 
-router.post("/signup", signupLimiter,
+router.post(
+  "/signup",
+  signupLimiter,
   [
     body("email").isEmail(),
     body("password").isLength({ min: 8 }),
@@ -71,7 +75,6 @@ router.post("/signup", signupLimiter,
   }
 );
 
-
 /* ================= LOGOUT ================= */
 router.post("/logout", (req, res) => {
   req.session.destroy(() => {
@@ -88,7 +91,7 @@ router.get("/dashboard", requireAuth, async (req, res) => {
     }).sort({ createdAt: -1 });
 
     const totalBlogs = blogs.length;
-    const publishedBlogs = blogs.filter(b => b.published).length;
+    const publishedBlogs = blogs.filter((b) => b.published).length;
     const draftBlogs = totalBlogs - publishedBlogs;
 
     res.render("dashboard", {
@@ -106,6 +109,38 @@ router.get("/dashboard", requireAuth, async (req, res) => {
       user: req.session.user,
       blogs: [],
       stats: { total: 0, published: 0, drafts: 0 },
+    });
+  }
+});
+
+/* ================= USER PROFILE ================= */
+router.get("/profile", requireAuth, async (req, res) => {
+  try {
+    const blogs = await Blog.find({
+      author: req.session.user._id,
+    });
+
+    const totalBlogs = blogs.length;
+    const published = blogs.filter((b) => b.published).length;
+    const drafts = totalBlogs - published;
+
+    res.render("profile", {
+      user: req.session.user,
+      stats: {
+        total: totalBlogs,
+        published,
+        drafts,
+      },
+    });
+  } catch (err) {
+    console.error("Profile load error:", err.message);
+    res.render("profile", {
+      user: req.session.user,
+      stats: {
+        total: 0,
+        published: 0,
+        drafts: 0,
+      },
     });
   }
 });
