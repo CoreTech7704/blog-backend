@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include("./partials/head") %>
+    <title>Dashboard</title>
+  </head>
+  <body class="d-flex flex-column min-vh-100">
+    <%- include("./partials/nav") %>
+
+    <main class="flex-grow-1">
+        <div class="container mt-4">
+      <!-- User context -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 class="mb-1">Welcome, <%= user.fullname %></h3>
+          <p class="text-muted mb-0">Manage your blogs and drafts here</p>
+        </div>
+
+        <a href="/blog/new" class="btn btn-primary"> + Write New Blog </a>
+      </div>
+
+      <!-- Stats summary -->
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+              <h5 class="mb-1"><%= stats.total %></h5>
+              <p class="text-muted mb-0">Total Blogs</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+              <h5 class="mb-1 text-success"><%= stats.published %></h5>
+              <p class="text-muted mb-0">Published</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+              <h5 class="mb-1 text-warning"><%= stats.drafts %></h5>
+              <p class="text-muted mb-0">Drafts</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Blog list -->
+      <% if (blogs.length === 0) { %>
+
+      <!-- Empty state -->
+      <div class="alert alert-light border text-center py-5">
+        <h5 class="mb-2">No blogs yet</h5>
+        <p class="text-muted">You haven’t written any blogs yet.</p>
+        <a href="/blog/new" class="btn btn-outline-primary">
+          Write your first blog
+        </a>
+      </div>
+
+      <% } else { %>
+
+      <div class="table-responsive" style="border-radius: 10px;">
+        <table class="table align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Last Updated</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% blogs.forEach(blog => { %>
+            <tr>
+              <td>
+                <strong><%= blog.title %></strong>
+              </td>
+
+              <td>
+                <% if (blog.published) { %>
+                <span class="badge bg-success">Published</span>
+                <% } else { %>
+                <span class="badge bg-warning text-dark">Draft</span>
+                <% } %>
+              </td>
+
+              <td class="text-muted small">
+                <%= blog.updatedAt.toDateString() %>
+              </td>
+
+              <td class="text-end">
+                <a
+                  href="/blog/<%= blog._id %>"
+                  class="btn btn-sm btn-outline-secondary"
+                >
+                  View
+                </a>
+
+                <a
+                  href="/blog/<%= blog._id %>/edit"
+                  class="btn btn-sm btn-outline-primary"
+                >
+                  Edit
+                </a>
+
+                <form
+                  action="/blog/<%= blog._id %>/toggle-publish"
+                  method="POST"
+                  class="d-inline"
+                >
+                  <% if (blog.published) { %>
+                  <button class="btn btn-sm btn-outline-warning">
+                    Unpublish
+                  </button>
+                  <% } else { %>
+                  <button class="btn btn-sm btn-outline-success">
+                    Publish
+                  </button>
+                  <% } %>
+                </form>
+
+                <form
+                  action="/blog/<%= blog._id %>?_method=DELETE"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Delete this blog?');"
+                >
+                  <button class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <% } %>
+    </div>
+    </main>
+
+    <%- include('./partials/footer') %> 
+    <%- include("./partials/scripts") %>
+  </body>
+</html>

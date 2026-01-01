@@ -115,4 +115,28 @@ router.delete("/:id", requireAuth, async (req, res) => {
   res.redirect("/");
 });
 
+/* ================= TOGGLE PUBLISH ================= */
+router.post("/:id/toggle-publish", requireAuth, async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id);
+
+    if (!blog) {
+      return res.status(404).send("Blog not found");
+    }
+
+    // Ownership check
+    if (blog.author.toString() !== req.session.user._id) {
+      return res.status(403).send("Not authorized");
+    }
+
+    blog.published = !blog.published;
+    await blog.save();
+
+    res.redirect("/user/dashboard");
+  } catch (err) {
+    console.error("Toggle publish error:", err.message);
+    res.redirect("/user/dashboard");
+  }
+});
+
 module.exports = router;

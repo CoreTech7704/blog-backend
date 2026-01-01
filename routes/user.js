@@ -3,6 +3,7 @@ const { body, validationResult } = require("express-validator");
 const User = require("../models/user");
 const requireAuth = require("../middleware/requireAuth");
 const { loginLimiter, signupLimiter } = require("../middleware/rateLimit");
+const Blog = require("../models/blog");
 const router = Router();
 
 /* ================= SIGN IN ================= */
@@ -79,9 +80,34 @@ router.post("/logout", (req, res) => {
   });
 });
 
-/* ================= PROTECTED ROUTE ================= */
-router.get("/dashboard", requireAuth, (req, res) => {
-  res.render("dashboard");
+/* ================= USER DASHBOARD ================= */
+router.get("/dashboard", requireAuth, async (req, res) => {
+  try {
+    const blogs = await Blog.find({
+      author: req.session.user._id,
+    }).sort({ createdAt: -1 });
+
+    const totalBlogs = blogs.length;
+    const publishedBlogs = blogs.filter(b => b.published).length;
+    const draftBlogs = totalBlogs - publishedBlogs;
+
+    res.render("dashboard", {
+      user: req.session.user,
+      blogs,
+      stats: {
+        total: totalBlogs,
+        published: publishedBlogs,
+        drafts: draftBlogs,
+      },
+    });
+  } catch (err) {
+    console.error("Dashboard load error:", err.message);
+    res.render("dashboard", {
+      user: req.session.user,
+      blogs: [],
+      stats: { total: 0, published: 0, drafts: 0 },
+    });
+  }
 });
 
 module.exports = router;
