@@ -1,0 +1,17 @@
+<h2>Blogs</h2>
+<table>
+  <% blogs.forEach(b => { %>
+  <tr>
+    <td><%= b.title %></td>
+    <td><%= b.status %></td>
+    <td>
+      <% if (b.status !== "published") { %>
+      <form method="POST" action="/admin/blogs/<%= blog._id %>/delete">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button type="submit">Delete</button>
+      </form>
+      <% } %>
+    </td>
+  </tr>
+  <% }) %>
+</table>
