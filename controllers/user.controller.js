@@ -1,6 +1,30 @@
 const Blog = require("../models/Blog");
 const User = require("../models/User");
-const { getCache, setCache, delCache } = require("../utils/cache");
+const { getCache, setCache } = require("../utils/cache");
+
+/* ================= GET PROFILE ================= */
+exports.getProfile = async (req, res) => {
+  const user = await User.findById(req.user.id)
+    .select("fullname email username avatar")
+    .lean();
+
+  res.json(user);
+};
+
+/* ================= UPDATE PROFILE ================= */
+exports.updateProfile = async (req, res) => {
+  const { fullname, avatar } = req.body;
+
+  const user = await User.findByIdAndUpdate(
+    req.user.id,
+    { fullname, avatar },
+    { new: true }
+  )
+    .select("fullname email username avatar")
+    .lean();
+
+  res.json(user);
+};
 
 /* ================= GET DASHBOARD ================= */
 exports.dashboard = async (req, res) => {
@@ -11,8 +35,6 @@ exports.dashboard = async (req, res) => {
   if (cached) {
     return res.json(cached);
   }
-
-  /* ---------- Aggregations ---------- */
 
   const [stats] = await Blog.aggregate([
     { $match: { author: userId } },

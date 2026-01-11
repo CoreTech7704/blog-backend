@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const admin = require("../controllers/admin.controller");
-const adminAuth = require("../middlewares/admin-auth.middleware");
+const adminAuth = require("../middlewares/admin/auth.middleware");
 const csrf = require("csurf");
 const csrfProtection = csrf({ cookie: true });
 

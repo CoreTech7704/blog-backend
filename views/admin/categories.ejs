@@ -1,73 +1,23 @@
-<%- include("layout") %>
+<%- include("layout", {
+  body: `
+    <h2 class="mb-4">Manage Categories</h2>
 
-<div class="container">
-  <h2 class="mb-4">Manage Categories</h2>
+    <form method="POST" action="/admin/categories">
+      <div class="input-group mb-3">
+        <input name="name" class="form-control" placeholder="Category name" required>
+        <button class="btn btn-primary">Add</button>
+      </div>
+    </form>
 
-  <!-- CREATE CATEGORY -->
-  <div class="card mb-4">
-    <div class="card-body">
-      <h5 class="card-title">Add New Category</h5>
-
-      <form method="POST" action="/admin/categories">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-
-        <div class="mb-3">
-          <label class="form-label">Category Name</label>
-          <input
-            type="text"
-            name="name"
-            class="form-control"
-            placeholder="e.g. Web Development"
-            required
-          >
-        </div>
-
-        <button type="submit" class="btn btn-primary">
-          Create Category
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- CATEGORY LIST -->
-  <div class="card">
-    <div class="card-body">
-      <h5 class="card-title">Existing Categories</h5>
-
-      <% if (categories.length === 0) { %>
-        <p class="text-muted">No categories found.</p>
-      <% } else { %>
-        <table class="table table-bordered table-hover">
-          <thead class="table-light">
-            <tr>
-              <th>Name</th>
-              <th>Slug</th>
-              <th style="width: 120px;">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% categories.forEach(category => { %>
-              <tr>
-                <td><%= category.name %></td>
-                <td class="text-muted"><%= category.slug %></td>
-                <td>
-                  <form
-                    method="POST"
-                    action="/admin/categories/<%= category._id %>/delete"
-                    onsubmit="return confirm('Delete this category?')"
-                    style="display:inline;"
-                  >
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <button class="btn btn-sm btn-danger">
-                      Delete
-                    </button>
-                  </form>
-                </td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      <% } %>
-    </div>
-  </div>
-</div>
+    <ul class="list-group">
+      ${categories.map(cat => `
+        <li class="list-group-item d-flex justify-content-between">
+          ${cat.name}
+          <form method="POST" action="/admin/categories/${cat._id}/delete">
+            <button class="btn btn-sm btn-danger">Delete</button>
+          </form>
+        </li>
+      `).join("")}
+    </ul>
+  `
+}) %>

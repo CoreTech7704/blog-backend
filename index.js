@@ -7,6 +7,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const methodOverride = require("method-override");
 const cookieParser = require("cookie-parser");
+const csrf = require("csurf");
 const cors = require("cors");
 const compression = require("compression");
 
@@ -35,9 +36,9 @@ const readLimiter = rateLimit({
 /* ================= DATABASE ================= */
 mongoose
   .connect(process.env.MONGO_URL)
-  .then(() => console.log("✅ Connected to MongoDB"))
+  .then(() => console.log("Connected to MongoDB"))
   .catch((err) => {
-    console.error("❌ MongoDB connection error:", err);
+    console.error("MongoDB connection error:", err);
     process.exit(1);
   });
 
@@ -68,6 +69,7 @@ app.use(compression());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(csrf({ cookie: true }));
 
 app.use(
   cors({
@@ -76,6 +78,11 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
+
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
 
 app.use(express.static(path.resolve("./public")));
 app.use(methodOverride("_method"));

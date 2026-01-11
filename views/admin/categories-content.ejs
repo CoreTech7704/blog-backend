@@ -1,0 +1,19 @@
+<h2 class="mb-4">Manage Categories</h2>
+
+<form method="POST" action="/admin/categories">
+  <div class="input-group mb-3">
+    <input name="name" class="form-control" placeholder="Category name" required>
+    <button class="btn btn-primary">Add</button>
+  </div>
+</form>
+
+<ul class="list-group">
+  <% categories.forEach(cat => { %>
+    <li class="list-group-item d-flex justify-content-between">
+      <%= cat.name %>
+      <form method="POST" action="/admin/categories/<%= cat._id %>/delete">
+        <button class="btn btn-sm btn-danger">Delete</button>
+      </form>
+    </li>
+  <% }) %>
+</ul>
