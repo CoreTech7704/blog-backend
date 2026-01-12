@@ -52,6 +52,12 @@ const blogSchema = new Schema(
       index: true,
     },
 
+    featured: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+
     views: {
       type: Number,
       default: 0,
@@ -60,16 +66,25 @@ const blogSchema = new Schema(
   { timestamps: true }
 );
 
+/* ================= GET MY BLOGS ================= */
+exports.getMyBlogs = async (req, res) => {
+  const blogs = await Blog.find({
+    author: req.user.id, // 🔥 THIS MATCHES YOUR DB
+  })
+    .populate("category", "name")
+    .sort({ createdAt: -1 });
+
+  res.json(blogs);
+};
+
 /* ================= SLUG GENERATION ================= */
-blogSchema.pre("save", function (next) {
-  if (!this.isModified("title")) return next();
+blogSchema.pre("save", function () {
+  if (!this.isModified("title")) return;
 
   this.slug =
     slugify(this.title, { lower: true, strict: true }) +
     "-" +
     Date.now().toString().slice(-5);
-
-  next();
 });
 
 module.exports = model("Blog", blogSchema);

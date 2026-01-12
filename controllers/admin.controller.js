@@ -1,5 +1,5 @@
 const User = require("../models/User");
-const Blog = require("../models/Blog");
+const Blog = require("../models/blog");
 const Category = require("../models/Category");
 const { delCache } = require("../utils/cache");
 

@@ -1,4 +1,4 @@
-const Blog = require("../models/Blog");
+const Blog = require("../models/blog");
 const { getCache, setCache } = require("../utils/cache");
 
 exports.getHomeData = async (req, res) => {

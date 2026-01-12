@@ -1,6 +1,6 @@
 const { verifyAccessToken } = require("../utils/jwt");
 
-module.exports = (req, res, next) => {
+module.exports = function auth(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -10,8 +10,13 @@ module.exports = (req, res, next) => {
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = verifyAccessToken(token);
-    req.user = decoded; // { id, role }
+    const decoded = verifyAccessToken(token); // { id, role }
+
+    req.user = {
+      id: decoded.id,
+      role: decoded.role,
+    };
+
     next();
   } catch (err) {
     return res.status(401).json({ message: "Invalid or expired token" });

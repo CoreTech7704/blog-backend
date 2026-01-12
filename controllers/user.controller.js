@@ -1,29 +1,63 @@
-const Blog = require("../models/Blog");
+const Blog = require("../models/blog");
 const User = require("../models/User");
 const { getCache, setCache } = require("../utils/cache");
+const deleteFile = require("../utils/deleteFile");
 
 /* ================= GET PROFILE ================= */
 exports.getProfile = async (req, res) => {
-  const user = await User.findById(req.user.id)
-    .select("fullname email username avatar")
-    .lean();
+const user = await User.findById(req.user.id).select(
+    "fullname username email avatar bio role createdAt"
+  );
 
-  res.json(user);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const blogs = await Blog.countDocuments({
+    author: req.user.id,
+    status: "published",
+  });
+
+  res.json({
+    user,
+    stats: {
+      blogs,
+    },
+  });
 };
 
 /* ================= UPDATE PROFILE ================= */
 exports.updateProfile = async (req, res) => {
-  const { fullname, avatar } = req.body;
+    const { fullname, username, bio } = req.body;
 
-  const user = await User.findByIdAndUpdate(
-    req.user.id,
-    { fullname, avatar },
-    { new: true }
-  )
-    .select("fullname email username avatar")
-    .lean();
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
 
-  res.json(user);
+  if (fullname) user.fullname = fullname;
+  if (bio !== undefined) user.bio = bio;
+
+  // username change (optional but safe)
+  if (username && username !== user.username) {
+    const exists = await User.findOne({ username });
+    if (exists) {
+      return res.status(400).json({ message: "Username already taken" });
+    }
+    user.username = username;
+  }
+
+  await user.save();
+
+  res.json({
+    message: "Profile updated",
+    user: {
+      fullname: user.fullname,
+      username: user.username,
+      bio: user.bio,
+      avatar: user.avatar,
+    },
+  });
 };
 
 /* ================= GET DASHBOARD ================= */
@@ -76,3 +110,27 @@ exports.dashboard = async (req, res) => {
 
   res.json(data);
 };
+
+exports.updateAvatar = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No image uploaded" });
+  }
+
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  // delete old avatar (helper already skips default)
+  deleteFile(user.avatar);
+
+  // save new path
+  user.avatar = `/uploads/avatars/${req.file.filename}`;
+  await user.save();
+
+  res.json({
+    message: "Avatar updated",
+    avatar: user.avatar,
+  });
+};
+

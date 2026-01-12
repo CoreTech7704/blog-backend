@@ -1,5 +1,5 @@
 const Category = require("../models/Category");
-const Blog = require("../models/Blog");
+const Blog = require("../models/blog");
 const { getCache, setCache, delCache } = require("../utils/cache");
 
 /* ================= GET ALL CATEGORIES ================= */

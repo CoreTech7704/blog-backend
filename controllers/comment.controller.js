@@ -1,5 +1,5 @@
 const Comment = require("../models/Comment");
-const Blog = require("../models/Blog");
+const Blog = require("../models/blog");
 const { getCache, setCache, delCache } = require("../utils/cache");
 
 /* ================= GET COMMENTS ================= */

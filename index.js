@@ -10,8 +10,17 @@ const cookieParser = require("cookie-parser");
 const csrf = require("csurf");
 const cors = require("cors");
 const compression = require("compression");
+const csrfProtection = csrf({ cookie: true });
 
 const app = express();
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
+
 const PORT = process.env.PORT || 8000;
 
 /* =============== Rate Limits ================ */
@@ -20,7 +29,6 @@ const authLimiter = rateLimit({
   max: 10,
   message: "Too many attempts, try later",
 });
-app.use("/api/auth", authLimiter);
 
 const commentLimiter = rateLimit({
   windowMs: 60 * 1000,
@@ -66,23 +74,9 @@ app.use(
 
 app.use(compression());
 
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
-app.use(csrf({ cookie: true }));
-
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-  })
-);
-
-app.use((req, res, next) => {
-  res.locals.csrfToken = req.csrfToken();
-  next();
-});
 
 app.use(express.static(path.resolve("./public")));
 app.use(methodOverride("_method"));
@@ -98,14 +92,14 @@ app.use(
 /* ================= ROUTES ================= */
 
 // API routes (React frontend)
-app.use("/api/auth", require("./routes/api/auth.routes"));
+app.use("/api/auth", authLimiter, require("./routes/api/auth.routes"));
 app.use("/api/blogs", require("./routes/api/blog.routes"));
 app.use("/api/categories", require("./routes/api/category.routes"));
 app.use("/api/user", require("./routes/api/user.routes"));
 app.use("/api/home", require("./routes/api/home.routes"));
 
 // Admin (EJS only)
-app.use("/admin", require("./routes/admin.routes"));
+app.use("/admin", csrfProtection, require("./routes/admin.routes"));
 
 /* ================= 404 HANDLER ================= */
 app.use((req, res) => {

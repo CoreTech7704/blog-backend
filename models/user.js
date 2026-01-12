@@ -30,7 +30,7 @@ const userSchema = new Schema(
       type: String,
       required: true,
       minlength: 8,
-      select: false, // IMPORTANT: never returned by default
+      select: false,
     },
 
     avatar: {
@@ -55,35 +55,23 @@ const userSchema = new Schema(
       default: true,
     },
 
+    // 🟢 kept but unused (safe)
     isEmailVerified: {
       type: Boolean,
-      default: false,
+      default: true,
     },
 
-    emailVerifyToken: {
-      type: String,
-    },
-
-    emailVerifyExpires: {
-      type: Date,
-    },
-
-    passwordResetToken: {
-      type: String,
-    },
-
-    passwordResetExpires: {
-      type: Date,
-    },
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   { timestamps: true }
 );
 
 /* ================= PASSWORD HASH ================= */
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+
   this.password = await bcrypt.hash(this.password, 12);
-  next();
 });
 
 /* ================= INSTANCE METHOD ================= */

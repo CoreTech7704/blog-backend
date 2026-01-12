@@ -1,6 +1,19 @@
-const Blog = require("../models/Blog");
+const Blog = require("../models/blog");
 const Comment = require("../models/Comment");
 const { getCache, setCache, delCache } = require("../utils/cache");
+const upload = require("../middlewares/upload.middleware");
+
+/* ================= GET MY BLOGS (DASHBOARD) ================= */
+exports.getMyBlogs = async (req, res) => {
+  const blogs = await Blog.find({
+    author: req.user.id,
+  })
+    .populate("category", "name")
+    .sort({ createdAt: -1 });
+
+  res.json(blogs);
+};
+
 
 /* ================= GET BLOG BY SLUG (CACHED) ================= */
 exports.getBlogBySlug = async (req, res) => {
@@ -71,13 +84,18 @@ exports.updateBlog = async (req, res) => {
     return res.status(403).json({ message: "Not allowed" });
   }
 
+  // ⛔ prevent dangerous updates
+  delete req.body.author;
+  delete req.body.slug;
+  delete req.body.views;
+
   Object.assign(blog, req.body);
   await blog.save();
 
   await delCache([
     "home:data",
     "blogs:latest",
-    `blog:slug:${slug}`,
+    `blog:slug:${blog.slug}`,
     `user:dashboard:${req.user.id}`,
   ]);
 
@@ -137,4 +155,35 @@ exports.getLatestBlogs = async (req, res) => {
   await setCache(cacheKey, blogs, 60);
 
   res.json(blogs);
+};
+
+/* ================= GET BLOG FOR EDIT ================= */
+exports.getBlogForEdit = async (req, res) => {
+  const blog = await Blog.findById(req.params.id)
+    .populate("category", "_id name");
+
+  if (!blog) {
+    return res.status(404).json({ message: "Blog not found" });
+  }
+
+  if (blog.author.toString() !== req.user.id) {
+    return res.status(403).json({ message: "Not allowed" });
+  }
+
+  res.json(blog);
+};
+
+exports.updateCover = async (req, res) => {
+  const blog = await Blog.findById(req.params.id);
+
+  if (!blog) return res.status(404).json({ message: "Blog not found" });
+  if (blog.author.toString() !== req.user.id)
+    return res.status(403).json({ message: "Not allowed" });
+
+  deleteFile(blog.coverImage);
+
+  blog.coverImage = `/uploads/covers/${req.file.filename}`;
+  await blog.save();
+
+  res.json({ coverImage: blog.coverImage });
 };

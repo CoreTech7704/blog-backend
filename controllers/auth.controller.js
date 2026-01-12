@@ -5,69 +5,70 @@ const {
   signRefreshToken,
   verifyRefreshToken,
 } = require("../utils/jwt");
-const { generateToken, hashToken } = require("../utils/token");
-const { sendEmail } = require("../utils/email");
 
-const crypto = require("crypto");
+/* ================= ME ================= */
+exports.me = async (req, res) => {
+  const user = await User.findById(req.user.id).select(
+    "fullname email role"
+  );
+
+  if (!user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  res.json(user);
+};
 
 /* ================= SIGNUP ================= */
 exports.signup = async (req, res) => {
-  const { fullname, username, email, password } = req.body;
+  const { fullname, email, password } = req.body;
 
-  const exists = await User.findOne({
-    $or: [{ email }, { username }],
-  });
+  const exists = await User.findOne({ email });
   if (exists) {
     return res.status(400).json({ message: "User already exists" });
   }
 
-  const verifyToken = generateToken();
+  // Auto-generate username
+  const base = email.split("@")[0].replace(/[^a-zA-Z0-9]/g, "");
+  const suffix = Math.floor(1000 + Math.random() * 9000);
+  const username = `${base}_${suffix}`;
 
   const user = await User.create({
     fullname,
     username,
     email,
     password,
-    emailVerifyToken: hashToken(verifyToken),
-    emailVerifyExpires: Date.now() + 24 * 60 * 60 * 1000, // 24h
+    isEmailVerified: true, // ✅ forced true
   });
 
-  const verifyURL = `${process.env.CLIENT_URL}/verify-email/${verifyToken}`;
+  const accessToken = signAccessToken({
+    id: user._id,
+    role: user.role,
+  });
 
-  await sendEmail({
-    to: email,
-    subject: "Verify your email",
-    html: `
-      <h3>Welcome to Core Blog</h3>
-      <p>Click below to verify your email:</p>
-      <a href="${verifyURL}">${verifyURL}</a>
-    `,
+  const refreshToken = signRefreshToken({ id: user._id });
+
+  await Token.create({
+    user: user._id,
+    tokenHash: Token.hashToken(refreshToken),
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  });
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
   res.status(201).json({
-    message: "Signup successful. Please verify your email.",
+    accessToken,
+    user: {
+      id: user._id,
+      fullname: user.fullname,
+      email: user.email,
+      role: user.role,
+    },
   });
-};
-
-/* ================= VERIFY EMAIL ================= */
-exports.verifyEmail = async (req, res) => {
-  const token = hashToken(req.params.token);
-
-  const user = await User.findOne({
-    emailVerifyToken: token,
-    emailVerifyExpires: { $gt: Date.now() },
-  });
-
-  if (!user) {
-    return res.status(400).json({ message: "Invalid or expired token" });
-  }
-
-  user.isEmailVerified = true;
-  user.emailVerifyToken = undefined;
-  user.emailVerifyExpires = undefined;
-  await user.save();
-
-  res.json({ message: "Email verified successfully" });
 };
 
 /* ================= LOGIN ================= */
@@ -77,10 +78,6 @@ exports.login = async (req, res) => {
   const user = await User.findOne({ email }).select("+password");
   if (!user) {
     return res.status(401).json({ message: "Invalid credentials" });
-  }
-
-  if (!user.isEmailVerified) {
-    return res.status(403).json({ message: "Please verify your email" });
   }
 
   const match = await user.comparePassword(password);
@@ -103,8 +100,7 @@ exports.login = async (req, res) => {
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+    sameSite: "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -138,7 +134,6 @@ exports.refresh = async (req, res) => {
     return res.status(401).json({ message: "Token revoked" });
   }
 
-  // Rotate token
   await storedToken.deleteOne();
 
   const newRefreshToken = signRefreshToken({ id: payload.id });
@@ -152,8 +147,7 @@ exports.refresh = async (req, res) => {
 
   res.cookie("refreshToken", newRefreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -170,57 +164,3 @@ exports.logout = async (req, res) => {
   res.clearCookie("refreshToken");
   res.json({ message: "Logged out" });
 };
-
-/* ================= FORGOT PASSWORD ================= */
-exports.forgotPassword = async (req, res) => {
-  const { email } = req.body;
-
-  const user = await User.findOne({ email });
-  if (!user) return res.json({ message: "Email sent if account exists" });
-
-  const resetToken = generateToken();
-
-  user.passwordResetToken = hashToken(resetToken);
-  user.passwordResetExpires = Date.now() + 15 * 60 * 1000; // 15 min
-  await user.save();
-
-  const resetURL = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
-
-  await sendEmail({
-    to: email,
-    subject: "Password reset",
-    html: `
-      <p>Reset your password:</p>
-      <a href="${resetURL}">${resetURL}</a>
-    `,
-  });
-
-  res.json({ message: "Email sent if account exists" });
-};
-
-/* ================= RESET PASSWORD ================= */
-exports.resetPassword = async (req, res) => {
-  const token = hashToken(req.params.token);
-  const { password } = req.body;
-
-  const user = await User.findOne({
-    passwordResetToken: token,
-    passwordResetExpires: { $gt: Date.now() },
-  });
-
-  if (!user) {
-    return res.status(400).json({ message: "Invalid or expired token" });
-  }
-
-  user.password = password;
-  user.passwordResetToken = undefined;
-  user.passwordResetExpires = undefined;
-
-  // Invalidate all refresh tokens
-  await Token.deleteMany({ user: user._id });
-
-  await user.save();
-
-  res.json({ message: "Password reset successful" });
-};
-

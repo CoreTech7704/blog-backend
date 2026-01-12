@@ -19,10 +19,9 @@ const categorySchema = new Schema(
   { timestamps: true }
 );
 
-categorySchema.pre("save", function (next) {
-  if (!this.isModified("name")) return next();
+categorySchema.pre("save", function () {
+  if (!this.isModified("name")) return;
   this.slug = slugify(this.name, { lower: true, strict: true });
-  next();
 });
 
 module.exports = model("Category", categorySchema);
