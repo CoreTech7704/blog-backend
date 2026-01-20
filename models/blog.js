@@ -29,7 +29,7 @@ const blogSchema = new Schema(
 
     coverImage: {
       type: String,
-      default: "/images/blog-default.jpg",
+      default: null,
     },
 
     author: {

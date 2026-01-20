@@ -18,7 +18,12 @@ router.put(
 /* ================= PROTECTED ================= */
 
 router.get("/me", auth, blogController.getMyBlogs);
-router.post("/", auth, blogController.createBlog);
+router.post(
+  "/",
+  auth,
+  upload.single("cover"),
+  blogController.createBlog
+);
 router.put("/:id", auth, blogController.updateBlog);
 router.delete("/:id", auth, blogController.deleteBlog);
 

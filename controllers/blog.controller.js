@@ -57,6 +57,9 @@ exports.createBlog = async (req, res) => {
     category,
     status: status || "draft",
     author: req.user.id,
+    coverImage: req.file
+      ? `/uploads/covers/${req.file.filename}`
+      : null,
   });
 
   await delCache([

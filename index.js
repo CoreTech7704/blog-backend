@@ -13,6 +13,12 @@ const compression = require("compression");
 const csrfProtection = csrf({ cookie: true });
 
 const app = express();
+const normalizeOrigin = (url) =>
+  url?.replace(/\/$/, "");
+const CLIENT_URL = normalizeOrigin(process.env.CLIENT_URL);
+const SERVER_URL = normalizeOrigin(process.env.SERVER_URL);
+const UPLOADS_URL = `${SERVER_URL}/uploads`;
+
 app.use(
   cors({
     origin: process.env.CLIENT_URL,
@@ -60,15 +66,23 @@ app.set("views", path.resolve("./views"));
 /* ================= GLOBAL MIDDLEWARE ================= */
 app.use(
   helmet({
+    crossOriginResourcePolicy: false, // required for images
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https:"],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "blob:",
+          CLIENT_URL,
+          SERVER_URL,
+          UPLOADS_URL,
+          'https://4d30srsd-5173.inc1.devtunnels.ms/'
+        ],
         scriptSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https:"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
       },
     },
-    referrerPolicy: { policy: "no-referrer" },
   })
 );
 
@@ -92,11 +106,12 @@ app.use(
 /* ================= ROUTES ================= */
 
 // API routes (React frontend)
-app.use("/api/auth", authLimiter, require("./routes/api/auth.routes"));
+app.use("/api/auth", require("./routes/api/auth.routes"));
 app.use("/api/blogs", require("./routes/api/blog.routes"));
 app.use("/api/categories", require("./routes/api/category.routes"));
 app.use("/api/user", require("./routes/api/user.routes"));
 app.use("/api/home", require("./routes/api/home.routes"));
+app.use("/api", require("./routes/api/comment.routes"));
 
 // Admin (EJS only)
 app.use("/admin", csrfProtection, require("./routes/admin.routes"));
