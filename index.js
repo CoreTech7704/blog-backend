@@ -10,7 +10,13 @@ const cookieParser = require("cookie-parser");
 const csrf = require("csurf");
 const cors = require("cors");
 const compression = require("compression");
-const csrfProtection = csrf({ cookie: true });
+const csrfProtection = csrf({
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  },
+});
 
 const app = express();
 const normalizeOrigin = (url) =>
@@ -21,7 +27,7 @@ const UPLOADS_URL = `${SERVER_URL}/uploads`;
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: CLIENT_URL,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
@@ -49,7 +55,9 @@ const readLimiter = rateLimit({
 
 /* ================= DATABASE ================= */
 mongoose
-  .connect(process.env.MONGO_URL)
+  .connect(process.env.MONGO_URL, {
+  serverSelectionTimeoutMS: 5000,
+})
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => {
     console.error("MongoDB connection error:", err);
@@ -77,7 +85,6 @@ app.use(
           CLIENT_URL,
           SERVER_URL,
           UPLOADS_URL,
-          'https://4d30srsd-5173.inc1.devtunnels.ms/'
         ],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
@@ -131,5 +138,5 @@ app.use(require("./middlewares/error.middleware"));
 
 /* ================= SERVER ================= */
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
