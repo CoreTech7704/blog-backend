@@ -3,17 +3,24 @@ const path = require("path");
 const fs = require("fs");
 
 const uploadDir = path.join(__dirname, "../public/uploads");
+const avatarDir = path.join(uploadBase, "avatars");
+const coverDir = path.join(uploadBase, "covers");
 
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// ENSURE ALL DIRECTORIES EXIST
+[uploadBase, avatarDir, coverDir].forEach((dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     if (file.fieldname === "cover") {
-      cb(null, path.join(uploadDir, "covers"));
+      cb(null, coverDir);
     } else if (file.fieldname === "avatar") {
-      cb(null, path.join(uploadDir, "avatars"));
+      cb(null, avatarDir);
+    } else {
+      cb(new Error("Invalid upload field"), null);
     }
   },
   filename: (req, file, cb) => {
@@ -24,7 +31,7 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
   if (!file.mimetype.startsWith("image/")) {
-    return cb(new Error("Only images allowed"), false);
+    return cb(new Error("Only image files allowed"), false);
   }
   cb(null, true);
 };

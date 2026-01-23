@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "seed:blog": "node scripts/seedBlogs.js"
+    "seed:Categories": "node scripts/seedCategories.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

@@ -5,8 +5,8 @@ const deleteFile = require("../utils/deleteFile");
 
 /* ================= GET PROFILE ================= */
 exports.getProfile = async (req, res) => {
-const user = await User.findById(req.user.id).select(
-    "fullname username email avatar bio role createdAt"
+  const user = await User.findById(req.user.id).select(
+    "fullname username email avatar bio role createdAt",
   );
 
   if (!user) {
@@ -28,7 +28,7 @@ const user = await User.findById(req.user.id).select(
 
 /* ================= UPDATE PROFILE ================= */
 exports.updateProfile = async (req, res) => {
-    const { fullname, username, bio } = req.body;
+  const { fullname, username, bio } = req.body;
 
   const user = await User.findById(req.user.id);
   if (!user) {
@@ -112,25 +112,29 @@ exports.dashboard = async (req, res) => {
 };
 
 exports.updateAvatar = async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "No image uploaded" });
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No image uploaded" });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // delete old avatar (helper already skips default)
+    deleteFile(user.avatar);
+
+    // save new path
+    user.avatar = `/uploads/avatars/${req.file.filename}`;
+    await user.save();
+
+    res.json({
+      message: "Avatar updated",
+      avatar: user.avatar,
+    });
+  } catch (err) {
+    console.error("Avatar upload error:", err);
+    res.status(500).json({ message: "Avatar upload failed" });
   }
-
-  const user = await User.findById(req.user.id);
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
-  }
-
-  // delete old avatar (helper already skips default)
-  deleteFile(user.avatar);
-
-  // save new path
-  user.avatar = `/uploads/avatars/${req.file.filename}`;
-  await user.save();
-
-  res.json({
-    message: "Avatar updated",
-    avatar: user.avatar,
-  });
 };
-
