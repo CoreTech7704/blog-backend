@@ -2,7 +2,10 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-const uploadDir = path.join(__dirname, "../public/uploads");
+// DEFINE BASE
+const uploadBase = path.join(__dirname, "../public/uploads");
+
+// DEFINE SUB BASE
 const avatarDir = path.join(uploadBase, "avatars");
 const coverDir = path.join(uploadBase, "covers");
 
