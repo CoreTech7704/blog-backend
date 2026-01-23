@@ -1,105 +1,190 @@
-# Core Blog 
+# ⚙️ Core Blog Backend API
 
-Core Blog is a developer-focused blogging platform built with Node.js, Express, MongoDB, and EJS, emphasizing performance, security, and clean architecture.
+A secure, scalable backend API for a modern blogging platform, built with **Node.js, Express, and MongoDB**.
+Handles authentication, blog management, comments, categories, and media uploads with production-ready middleware and deployment.
 
-It is designed to evolve gradually starting with server-rendered pages and later transitioning to an API-driven React frontend, while keeping the admin panel server-rendered for control and auditing.
+
+## 🚀 Live API
+
+**Base URL:**
+
+```
+https://blog-backend-3laz.onrender.com
+```
+
+> ⚠️ First request may be slow due to free-tier cold starts.
+
+
+
+## 📦 Tech Stack
+
+* **Node.js**
+* **Express**
+* **MongoDB Atlas**
+* **Mongoose**
+* **JWT Authentication**
+* **Multer** (media uploads)
+* **Redis** (optional caching)
+* **Helmet** (security headers)
+* **CORS**
+* **Rate Limiting**
+* **Compression**
+
+
 
 ## ✨ Features
 
-- Secure authentication (sessions, bcrypt, rate limiting)
-- Blog creation with cover image upload
-- Draft & published blog support
-- Author-only access control
-- Server-side rendering with EJS (SEO-friendly)
-- Clean, scalable folder structure
-- API-ready architecture for future React frontend
-- Minimal, developer-centric UI
+### 🔐 Authentication & Security
 
-## 🛠 Tech Stack
+* User signup & login
+* JWT access + refresh token flow
+* Role-based access control (admin/user)
+* Protected routes
+* CSRF protection for admin routes
+* Rate limiting on sensitive endpoints
 
-- Backend: Node.js, Express
-- Database: MongoDB, Mongoose
-- Frontend (V1): EJS, Bootstrap
-- Auth: Sessions, bcrypt
-- File Uploads: Multer
-- Security: Helmet, rate limiting
-- Future Frontend: React (V2)
 
-## 📂 Project Structure
+
+### 👤 User Management
+
+* Fetch current user
+* Update user profile
+* Avatar upload with validation
+* Secure user-only access
+
+
+
+### 📝 Blog System
+
+* Create, read, update, delete blogs
+* Draft & publish workflow
+* Markdown-based content
+* Optional cover image upload
+* SEO-friendly slugs
+* Category association
+
+
+
+### 🏷️ Categories
+
+* Category CRUD (admin-only)
+* Slug auto-generation
+* Category-based blog filtering
+
+
+
+### 💬 Comments
+
+* Auth-protected comment creation
+* Fetch comments by blog
+* Comment deletion
+* Rate limiting applied
+
+
+
+### ⚡ Performance & Stability
+
+* Gzip compression
+* Graceful error handling
+* Clean JSON API responses
+* Redis caching (best-effort on free tier)
+* Safe Linux filesystem handling
+
+---
+
+## 🧪 Tested & Verified
+
+* Authentication & refresh flow
+* Profile updates
+* Avatar uploads
+* Blog CRUD (with & without images)
+* Category & comment APIs
+* Rate limiting
+* Error & timeout handling
+* Render deployment stability
+
+
+
+## ⚠️ Known Limitations
+
+* Uploaded files stored on ephemeral filesystem (Render free tier)
+* Files may reset on redeploy
+* Redis availability depends on free-tier limits
+* No email services yet
+
+
+
+## 📌 API Version
+
 ```
-.
-├── models/
-├── routes/
-│   ├── web/        # EJS routes
-│   └── api/        # API routes (V2)
-├── middleware/
-├── views/
-├── public/
-├── index.js
-└── README.md
+v1.5.0 (Stable Beta)
 ```
 
-## 🚀 Getting Started
+---
 
-1. Clone the repository
+## 🛠️ Environment Variables
+
+Create a `.env` file in the root:
+
+```env
+PORT=8000
+MONGO_URI=your_mongodb_atlas_uri
+JWT_SECRET=your_jwt_secret
+JWT_REFRESH_SECRET=your_refresh_secret
+CLIENT_URL=http://localhost:5173
+SERVER_URL=http://localhost:8000
+REDIS_URL=optional_redis_url
+```
+
+
+## 🧑‍💻 Local Development
+
 ```bash
-git clone https://github.com/your-username/core-blog.git
-cd core-blog
-```
-2. Install dependencies
-```bash
+git clone https://github.com/CoreTech7704/blog-backend.git
+cd blog-backend
 npm install
-```
-
-3. Environment variables
-
-- Create a .env file:
-```bash
-MONGO_URL=mongodb://localhost:27017/core-blog
-SESSION_SECRET=your_long_random_secret
-```
-4. Run the app
-```bash
 npm run dev
 ```
 
-- App will be available at:
+Server will start at:
+
+```
 http://localhost:8000
+```
 
-## 🔐 Authentication Notes
 
-- Passwords are hashed using bcrypt
-- Sessions are stored securely
-- Rate limiting is applied to auth routes
-- Admin logic is server-side only
+## 📂 Project Structure
 
-## 🧭 Roadmap
+```
+src/
+├── controllers/
+├── routes/
+├── middlewares/
+├── models/
+├── utils/
+├── public/uploads/
+├── scripts/
+├── index.js
+```
 
-### V1 (Under Progress)-Core blogging features
-- SSR with EJS
-- Secure authentication
-- Image uploads
-- Homepage & blog views
-### V2 (Planned)
-- React frontend
-- API-only public backend
-- Pagination & search
-- Comments & interactions
-- Email verification
+
 
 ## 🤝 Contributing
 
-This project follows an open-source, improvement-driven approach.
-Feel free to fork, improve, and adapt it for your own needs.
+This backend is currently in **beta**.
+Bug reports and improvement suggestions are welcome.
 
-## 📜 License
 
-MIT License
 
-## 👤 Author
+## 👨‍💻 Author
 
-Patel Sarvam  
-GitHub: [@CoreTech7704](https://github.com/CoreTech7704)  
-LinkedIn: [@Sarvam-Patel](https://www.linkedin.com/in/sarvam-patel-89a414300/)
+**Sarvam Patel**
+GitHub: [https://github.com/CoreTech7704](https://github.com/CoreTech7704)
 
-Built with a focus on developers, performance, and clean architecture.
+
+
+## 🏁 Final Note
+
+This backend is designed to be **secure, scalable, and deployment-ready**, with real-world considerations like free-tier hosting, Linux filesystem behavior, and API hardening already handled.
+
+Ready for production iteration 🚀
