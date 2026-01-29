@@ -58,6 +58,11 @@ const blogSchema = new Schema(
       index: true,
     },
 
+    readingTime: {
+      type: Number, // minutes
+      default: 0,
+    },
+
     views: {
       type: Number,
       default: 0,
@@ -79,12 +84,23 @@ exports.getMyBlogs = async (req, res) => {
 
 /* ================= SLUG GENERATION ================= */
 blogSchema.pre("save", function () {
-  if (!this.isModified("title")) return;
+  // Generate slug only if title changed
+  if (this.isModified("title")) {
+    this.slug =
+      slugify(this.title, { lower: true, strict: true }) +
+      "-" +
+      Date.now().toString().slice(-5);
+  }
 
-  this.slug =
-    slugify(this.title, { lower: true, strict: true }) +
-    "-" +
-    Date.now().toString().slice(-5);
+  // Calculate reading time only if content changed
+  if (this.isModified("content")) {
+    const wordsPerMinute = 200;
+    const wordCount = this.content
+      ? this.content.trim().split(/\s+/).length
+      : 0;
+
+    this.readingTime = Math.max(1, Math.ceil(wordCount / wordsPerMinute));
+  }
 });
 
 module.exports = model("Blog", blogSchema);
