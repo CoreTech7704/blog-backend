@@ -196,3 +196,25 @@ exports.changePassword = async (req, res) => {
 
   res.json({ message: "Password updated successfully" });
 };
+
+/* ============= DELETE ACCOUNT ============= */
+exports.deleteAccount = async (req, res) => {
+  const userId = req.user.id;
+
+  // Remove all refresh tokens
+  await Token.deleteMany({ user: userId });
+
+  // Delete user
+  await User.findByIdAndDelete(userId);
+
+  // Clear cookie
+  res.clearCookie("refreshToken");
+
+  // Clear blogs
+  await Blog.deleteMany({ author: userId });
+
+  // Clear comments
+  await Comment.deleteMany({ user: userId });
+
+  res.json({ message: "Account deleted successfully" });
+};
