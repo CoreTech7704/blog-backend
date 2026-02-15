@@ -71,16 +71,13 @@ const blogSchema = new Schema(
   { timestamps: true }
 );
 
-/* ================= GET MY BLOGS ================= */
-exports.getMyBlogs = async (req, res) => {
-  const blogs = await Blog.find({
-    author: req.user.id, // 🔥 THIS MATCHES YOUR DB
-  })
-    .populate("category", "name")
-    .sort({ createdAt: -1 });
-
-  res.json(blogs);
-};
+// Text search index
+blogSchema.index({
+  title: "text",
+  excerpt: "text",
+  content: "text",
+  tags: "text",
+});
 
 /* ================= SLUG GENERATION ================= */
 blogSchema.pre("save", function () {

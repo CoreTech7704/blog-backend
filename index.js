@@ -115,6 +115,7 @@ app.use(
 // API routes (React frontend)
 app.use("/api/auth", require("./routes/api/auth.routes"));
 app.use("/api/blogs", require("./routes/api/blog.routes"));
+app.use("/api/search", require("./routes/api/search.routes"));
 app.use("/api/categories", require("./routes/api/category.routes"));
 app.use("/api/user", require("./routes/api/user.routes"));
 app.use("/api/home", require("./routes/api/home.routes"));
