@@ -9,17 +9,20 @@ exports.getComments = async (req, res) => {
     const { blogId } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(blogId)) {
-      return res.status(400).json({ message: "Invalid blog ID" });
+      return res.status(400).json({
+        total: 0,
+        comments: [],
+      });
     }
 
     const cacheKey = `blog:comments:${blogId}`;
-
     const cached = await getCache(cacheKey);
-    if (cached) {
+
+    if (cached && Array.isArray(cached.comments)) {
       return res.json(cached);
     }
 
-    const comments = await Comment.find({
+    const rawComments = await Comment.find({
       blog: blogId,
       isApproved: true,
     })
@@ -27,17 +30,32 @@ exports.getComments = async (req, res) => {
       .sort({ createdAt: 1 })
       .lean();
 
+    // 🔒 NORMALIZE DATA (critical)
+    const comments = rawComments.map((c) => ({
+      ...c,
+      user: c.user
+        ? c.user
+        : {
+            fullname: "Anonymous",
+            avatar: null,
+          },
+    }));
+
     const response = {
       total: comments.length,
       comments,
     };
 
     await setCache(cacheKey, response, 60);
-
     res.json(response);
   } catch (err) {
     console.error("GET COMMENTS ERROR:", err);
-    res.status(500).json({ message: "Failed to load comments" });
+
+    // UI safe + debuggable
+    res.status(500).json({
+      total: 0,
+      comments: [],
+    });
   }
 };
 
@@ -52,7 +70,6 @@ exports.addComment = async (req, res) => {
     }
 
     content = content?.trim();
-
     if (!content || content.length < 2) {
       return res.status(400).json({ message: "Comment is too short" });
     }
@@ -79,12 +96,16 @@ exports.addComment = async (req, res) => {
       user: req.user.id,
       content,
       parent: parent || null,
-      isApproved: true, // or false if you want moderation later
+      isApproved: true,
     });
 
-    await delCache(`blog:comments:${blogId}`);
+    // populate user before returning
+    const populatedComment = await Comment.findById(comment._id)
+      .populate("user", "fullname avatar")
+      .lean();
 
-    res.status(201).json(comment);
+    await delCache(`blog:comments:${blogId}`);
+    res.status(201).json(populatedComment);
   } catch (err) {
     console.error("ADD COMMENT ERROR:", err);
     res.status(500).json({ message: "Failed to add comment" });
@@ -105,10 +126,7 @@ exports.deleteComment = async (req, res) => {
       return res.status(404).json({ message: "Comment not found" });
     }
 
-    if (
-      comment.user.toString() !== req.user.id &&
-      req.user.role !== "admin"
-    ) {
+    if (comment.user.toString() !== req.user.id && req.user.role !== "admin") {
       return res.status(403).json({ message: "Not allowed" });
     }
 
@@ -118,7 +136,6 @@ exports.deleteComment = async (req, res) => {
     await comment.deleteOne();
 
     await delCache(`blog:comments:${blogId}`);
-
     res.json({ message: "Comment deleted" });
   } catch (err) {
     console.error("DELETE COMMENT ERROR:", err);
