@@ -6,7 +6,7 @@ exports.getCache = async (key) => {
 
   try {
     const data = await redis.get(key);
-    return data ? JSON.parse(data) : null;
+    return data ?? null;
   } catch (err) {
     console.error("❌ Redis GET failed:", err.message);
     return null;
@@ -18,7 +18,7 @@ exports.setCache = async (key, value, ttl = 60) => {
   if (!redis) return;
 
   try {
-    await redis.set(key, JSON.stringify(value), { EX: ttl });
+    await redis.set(key, value, { ex: ttl });
   } catch (err) {
     console.error("❌ Redis SET failed:", err.message);
   }
@@ -30,7 +30,7 @@ exports.delCache = async (keys) => {
 
   try {
     if (Array.isArray(keys)) {
-      await redis.del(...keys);
+      await Promise.all(keys.map((k) => redis.del(k)));
     } else {
       await redis.del(keys);
     }

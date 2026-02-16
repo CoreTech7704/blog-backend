@@ -1,192 +1,247 @@
 const Blog = require("../models/blog");
 const Comment = require("../models/Comment");
+const Category = require("../models/Category");
+const mongoose = require("mongoose");
 const { getCache, setCache, delCache } = require("../utils/cache");
-const upload = require("../middlewares/upload.middleware");
+const deleteFile = require("../utils/deleteFile");
 
-/* ================= GET MY BLOGS (DASHBOARD) ================= */
+/* ================= GET MY BLOGS ================= */
 exports.getMyBlogs = async (req, res) => {
-  const blogs = await Blog.find({
-    author: req.user.id,
-  })
-    .populate("category", "name")
-    .sort({ createdAt: -1 });
+  try {
+    const blogs = await Blog.find({ author: req.user.id })
+      .populate("category", "name")
+      .sort({ createdAt: -1 })
+      .lean();
 
-  res.json(blogs);
+    res.json(blogs);
+  } catch (err) {
+    console.error("GET MY BLOGS ERROR:", err);
+    res.status(500).json({ message: "Failed to load blogs" });
+  }
 };
 
-
-/* ================= GET BLOG BY SLUG (CACHED) ================= */
+/* ================= GET BLOG BY SLUG ================= */
 exports.getBlogBySlug = async (req, res) => {
-  const { slug } = req.params;
-  const cacheKey = `blog:slug:${slug}`;
+  try {
+    const { slug } = req.params;
+    const cacheKey = `blog:slug:${slug}`;
 
-  const cached = await getCache(cacheKey);
-  if (cached) {
-    // increment views asynchronously
-    Blog.updateOne({ _id: cached._id }, { $inc: { views: 1 } }).exec();
-    return res.json(cached);
+    const cached = await getCache(cacheKey);
+    if (cached) {
+      Blog.updateOne({ _id: cached._id }, { $inc: { views: 1 } }).exec();
+      return res.json(cached);
+    }
+
+    const blog = await Blog.findOne({
+      slug,
+      status: "published",
+    })
+      .populate("author", "fullname avatar")
+      .lean();
+
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    await setCache(cacheKey, blog, 600);
+    Blog.updateOne({ _id: blog._id }, { $inc: { views: 1 } }).exec();
+
+    res.json(blog);
+  } catch (err) {
+    console.error("GET BLOG ERROR:", err);
+    res.status(500).json({ message: "Failed to load blog" });
   }
-
-  const blog = await Blog.findOne({
-    slug,
-    status: "published",
-  })
-    .populate("author", "fullname avatar")
-    .lean();
-
-  if (!blog) {
-    return res.status(404).json({ message: "Blog not found" });
-  }
-
-  await setCache(cacheKey, blog, 600); // 10 min cache
-
-  Blog.updateOne({ _id: blog._id }, { $inc: { views: 1 } }).exec();
-
-  res.json(blog);
 };
 
 /* ================= CREATE BLOG ================= */
 exports.createBlog = async (req, res) => {
-  const { title, content, excerpt, tags, category, status } = req.body;
+  try {
+    const { title, content, excerpt, tags, category, status } = req.body;
 
-  const blog = await Blog.create({
-    title,
-    content,
-    excerpt,
-    tags,
-    category,
-    status: status || "draft",
-    author: req.user.id,
-    coverImage: req.file
-      ? `/uploads/covers/${req.file.filename}`
-      : null,
-  });
+    if (!title || !content) {
+      return res.status(400).json({ message: "Title and content are required" });
+    }
 
-  await delCache([
-    "home:data",
-    "blogs:latest",
-    `user:dashboard:${req.user.id}`,
-  ]);
+    const blog = await Blog.create({
+      title,
+      content,
+      excerpt,
+      tags,
+      category,
+      status: status === "published" ? "published" : "draft",
+      author: req.user.id,
+      coverImage: req.file
+        ? `/uploads/covers/${req.file.filename}`
+        : null,
+    });
 
-  if (blog.category) {
-    await delCache(`category:blogs:${blog.category}`);
+    await delCache([
+      "home:data",
+      "blogs:latest",
+      `user:dashboard:${req.user.id}`,
+    ]);
+
+    if (blog.category) {
+      const cat = await Category.findById(blog.category).lean();
+      if (cat) await delCache(`category:blogs:${cat.slug}`);
+    }
+
+    res.status(201).json(blog);
+  } catch (err) {
+    console.error("CREATE BLOG ERROR:", err);
+    res.status(500).json({ message: "Failed to create blog" });
   }
-
-  res.status(201).json(blog);
 };
 
 /* ================= UPDATE BLOG ================= */
 exports.updateBlog = async (req, res) => {
-  const blog = await Blog.findById(req.params.id);
+  try {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
 
-  if (!blog) {
-    return res.status(404).json({ message: "Blog not found" });
+    if (blog.author.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not allowed" });
+    }
+
+    delete req.body.author;
+    delete req.body.slug;
+    delete req.body.views;
+
+    const oldCategory = blog.category?.toString();
+
+    Object.assign(blog, req.body);
+    await blog.save();
+
+    await delCache([
+      "home:data",
+      "blogs:latest",
+      `blog:slug:${blog.slug}`,
+      `user:dashboard:${req.user.id}`,
+    ]);
+
+    if (oldCategory) {
+      const cat = await Category.findById(oldCategory).lean();
+      if (cat) await delCache(`category:blogs:${cat.slug}`);
+    }
+
+    if (blog.category && blog.category.toString() !== oldCategory) {
+      const newCat = await Category.findById(blog.category).lean();
+      if (newCat) await delCache(`category:blogs:${newCat.slug}`);
+    }
+
+    res.json(blog);
+  } catch (err) {
+    console.error("UPDATE BLOG ERROR:", err);
+    res.status(500).json({ message: "Failed to update blog" });
   }
-
-  if (blog.author.toString() !== req.user.id) {
-    return res.status(403).json({ message: "Not allowed" });
-  }
-
-  // ⛔ prevent dangerous updates
-  delete req.body.author;
-  delete req.body.slug;
-  delete req.body.views;
-
-  Object.assign(blog, req.body);
-  await blog.save();
-
-  await delCache([
-    "home:data",
-    "blogs:latest",
-    `blog:slug:${blog.slug}`,
-    `user:dashboard:${req.user.id}`,
-  ]);
-
-  if (blog.category) {
-    await delCache(`category:blogs:${blog.category}`);
-  }
-
-  res.json(blog);
 };
 
 /* ================= DELETE BLOG ================= */
 exports.deleteBlog = async (req, res) => {
-  const blog = await Blog.findById(req.params.id);
+  try {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
 
-  if (!blog) {
-    return res.status(404).json({ message: "Blog not found" });
+    if (blog.author.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not allowed" });
+    }
+
+    const slug = blog.slug;
+    const categoryId = blog.category;
+
+    await Comment.deleteMany({ blog: blog._id });
+    deleteFile(blog.coverImage);
+    await blog.deleteOne();
+
+    await delCache([
+      "home:data",
+      "blogs:latest",
+      `blog:slug:${slug}`,
+      `user:dashboard:${req.user.id}`,
+    ]);
+
+    if (categoryId) {
+      const cat = await Category.findById(categoryId).lean();
+      if (cat) await delCache(`category:blogs:${cat.slug}`);
+    }
+
+    res.json({ message: "Blog deleted" });
+  } catch (err) {
+    console.error("DELETE BLOG ERROR:", err);
+    res.status(500).json({ message: "Failed to delete blog" });
   }
-
-  if (blog.author.toString() !== req.user.id) {
-    return res.status(403).json({ message: "Not allowed" });
-  }
-
-  const slug = blog.slug;
-
-  await Comment.deleteMany({ blog: blog._id });
-  await blog.deleteOne();
-
-  await delCache([
-    "home:data",
-    "blogs:latest",
-    `blog:slug:${slug}`,
-    `user:dashboard:${req.user.id}`,
-  ]);
-
-  if (blog.category) {
-    await delCache(`category:blogs:${blog.category}`);
-  }
-
-  res.json({ message: "Blog deleted" });
 };
 
-/* ================= GET LATEST BLOGS (CACHED) ================= */
+/* ================= GET LATEST BLOGS ================= */
 exports.getLatestBlogs = async (req, res) => {
-  const cacheKey = "blogs:latest";
+  try {
+    const cacheKey = "blogs:latest";
 
-  const cached = await getCache(cacheKey);
-  if (cached) {
-    return res.json(cached);
+    const cached = await getCache(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
+    const blogs = await Blog.find({ status: "published" })
+      .populate("author", "fullname avatar")
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean();
+
+    await setCache(cacheKey, blogs, 60);
+
+    res.json(blogs);
+  } catch (err) {
+    console.error("GET LATEST BLOGS ERROR:", err);
+    res.status(500).json({ message: "Failed to load latest blogs" });
   }
-
-  const blogs = await Blog.find({ status: "published" })
-    .populate("author", "fullname avatar")
-    .sort({ createdAt: -1 })
-    .limit(10)
-    .lean();
-
-  await setCache(cacheKey, blogs, 60);
-
-  res.json(blogs);
 };
 
 /* ================= GET BLOG FOR EDIT ================= */
 exports.getBlogForEdit = async (req, res) => {
-  const blog = await Blog.findById(req.params.id)
-    .populate("category", "_id name");
+  try {
+    const blog = await Blog.findById(req.params.id)
+      .populate("category", "_id name");
 
-  if (!blog) {
-    return res.status(404).json({ message: "Blog not found" });
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    if (blog.author.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not allowed" });
+    }
+
+    res.json(blog);
+  } catch (err) {
+    console.error("GET BLOG FOR EDIT ERROR:", err);
+    res.status(500).json({ message: "Failed to load blog" });
   }
-
-  if (blog.author.toString() !== req.user.id) {
-    return res.status(403).json({ message: "Not allowed" });
-  }
-
-  res.json(blog);
 };
 
+/* ================= UPDATE COVER ================= */
 exports.updateCover = async (req, res) => {
-  const blog = await Blog.findById(req.params.id);
+  try {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) return res.status(404).json({ message: "Blog not found" });
 
-  if (!blog) return res.status(404).json({ message: "Blog not found" });
-  if (blog.author.toString() !== req.user.id)
-    return res.status(403).json({ message: "Not allowed" });
+    if (blog.author.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not allowed" });
+    }
 
-  deleteFile(blog.coverImage);
+    deleteFile(blog.coverImage);
 
-  blog.coverImage = `/uploads/covers/${req.file.filename}`;
-  await blog.save();
+    blog.coverImage = `/uploads/covers/${req.file.filename}`;
+    await blog.save();
 
-  res.json({ coverImage: blog.coverImage });
+    await delCache(`blog:slug:${blog.slug}`);
+
+    res.json({ coverImage: blog.coverImage });
+  } catch (err) {
+    console.error("UPDATE COVER ERROR:", err);
+    res.status(500).json({ message: "Failed to update cover" });
+  }
 };

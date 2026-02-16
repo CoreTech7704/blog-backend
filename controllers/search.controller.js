@@ -23,7 +23,7 @@ exports.searchBlogs = async (req, res) => {
     /* ================= CACHE HIT ================= */
     const cached = await redis.get(cacheKey);
     if (cached) {
-      return res.json(JSON.parse(cached));
+      return res.json(cached); // Upstash auto parses JSON
     }
 
     /* ================= DB QUERY ================= */
@@ -35,9 +35,7 @@ exports.searchBlogs = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const [results, total] = await Promise.all([
-      Blog.find(query, {
-        score: { $meta: "textScore" },
-      })
+      Blog.find(query, { score: { $meta: "textScore" } })
         .select("title slug excerpt tags readingTime createdAt")
         .sort({ score: { $meta: "textScore" }, createdAt: -1 })
         .skip(skip)
@@ -57,12 +55,7 @@ exports.searchBlogs = async (req, res) => {
     };
 
     /* ================= CACHE SET ================= */
-    await redis.set(
-      cacheKey,
-      JSON.stringify(response),
-      "EX",
-      300 // 5 minutes
-    );
+    await redis.set(cacheKey, response, { ex: 300 });
 
     res.json(response);
   } catch (err) {
