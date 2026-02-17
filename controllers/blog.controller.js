@@ -56,17 +56,29 @@ exports.getBlogBySlug = async (req, res) => {
 /* ================= CREATE BLOG ================= */
 exports.createBlog = async (req, res) => {
   try {
-    const { title, content, excerpt, tags, category, status } = req.body;
+    const { title, content, excerpt, category, status } = req.body;
 
     if (!title || !content) {
       return res.status(400).json({ message: "Title and content are required" });
+    }
+
+    let parsedTags = ["General"];
+    if (req.body.tags) {
+      try {
+        parsedTags = JSON.parse(req.body.tags);
+        if (!Array.isArray(parsedTags) || parsedTags.length === 0) {
+          parsedTags = ["General"];
+        }
+      } catch {
+        parsedTags = ["General"];
+      }
     }
 
     const blog = await Blog.create({
       title,
       content,
       excerpt,
-      tags,
+      tags: parsedTags,
       category,
       status: status === "published" ? "published" : "draft",
       author: req.user.id,
@@ -110,6 +122,16 @@ exports.updateBlog = async (req, res) => {
     delete req.body.views;
 
     const oldCategory = blog.category?.toString();
+
+    // ✅ Handle tags safely
+    if (req.body.tags) {
+      if (Array.isArray(req.body.tags) && req.body.tags.length > 0) {
+        blog.tags = req.body.tags;
+      } else {
+        blog.tags = ["General"];
+      }
+      delete req.body.tags;
+    }
 
     Object.assign(blog, req.body);
     await blog.save();
