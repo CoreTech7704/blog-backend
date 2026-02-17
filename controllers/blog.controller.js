@@ -4,6 +4,7 @@ const Category = require("../models/Category");
 const mongoose = require("mongoose");
 const { getCache, setCache, delCache } = require("../utils/cache");
 const deleteFile = require("../utils/deleteFile");
+const updateAuthorStatus = require("../utils/updateAuthorStatus");
 
 /* ================= GET MY BLOGS ================= */
 exports.getMyBlogs = async (req, res) => {
@@ -59,7 +60,9 @@ exports.createBlog = async (req, res) => {
     const { title, content, excerpt, category, status } = req.body;
 
     if (!title || !content) {
-      return res.status(400).json({ message: "Title and content are required" });
+      return res
+        .status(400)
+        .json({ message: "Title and content are required" });
     }
 
     let parsedTags = ["General"];
@@ -82,9 +85,7 @@ exports.createBlog = async (req, res) => {
       category,
       status: status === "published" ? "published" : "draft",
       author: req.user.id,
-      coverImage: req.file
-        ? `/uploads/covers/${req.file.filename}`
-        : null,
+      coverImage: req.file ? `/uploads/covers/${req.file.filename}` : null,
     });
 
     await delCache([
@@ -96,6 +97,10 @@ exports.createBlog = async (req, res) => {
     if (blog.category) {
       const cat = await Category.findById(blog.category).lean();
       if (cat) await delCache(`category:blogs:${cat.slug}`);
+    }
+
+    if (blog.status === "published") {
+      await updateAuthorStatus(req.user.id);
     }
 
     res.status(201).json(blog);
@@ -122,11 +127,12 @@ exports.updateBlog = async (req, res) => {
     delete req.body.views;
 
     const oldCategory = blog.category?.toString();
+    const oldStatus = blog.status;
 
-    // ✅ Handle tags safely
+    // Handle tags safely
     if (req.body.tags) {
       if (Array.isArray(req.body.tags) && req.body.tags.length > 0) {
-        blog.tags = req.body.tags;
+        blog.tags = req.body.tags.map(t => t.trim()).filter(Boolean);
       } else {
         blog.tags = ["General"];
       }
@@ -151,6 +157,10 @@ exports.updateBlog = async (req, res) => {
     if (blog.category && blog.category.toString() !== oldCategory) {
       const newCat = await Category.findById(blog.category).lean();
       if (newCat) await delCache(`category:blogs:${newCat.slug}`);
+    }
+
+    if (oldStatus !== blog.status) {
+      await updateAuthorStatus(blog.author);
     }
 
     res.json(blog);
@@ -191,6 +201,7 @@ exports.deleteBlog = async (req, res) => {
       if (cat) await delCache(`category:blogs:${cat.slug}`);
     }
 
+    await updateAuthorStatus(blog.author);
     res.json({ message: "Blog deleted" });
   } catch (err) {
     console.error("DELETE BLOG ERROR:", err);
@@ -226,8 +237,10 @@ exports.getLatestBlogs = async (req, res) => {
 /* ================= GET BLOG FOR EDIT ================= */
 exports.getBlogForEdit = async (req, res) => {
   try {
-    const blog = await Blog.findById(req.params.id)
-      .populate("category", "_id name");
+    const blog = await Blog.findById(req.params.id).populate(
+      "category",
+      "_id name",
+    );
 
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });

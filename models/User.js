@@ -50,12 +50,17 @@ const userSchema = new Schema(
       default: "user",
     },
 
+    isAuthor: {
+      type: Boolean,
+      default: false,
+    },
+
     isActive: {
       type: Boolean,
       default: true,
     },
 
-    // 🟢 kept but unused (safe)
+    // unused (safe)
     isEmailVerified: {
       type: Boolean,
       default: true,
@@ -64,7 +69,7 @@ const userSchema = new Schema(
     passwordResetToken: String,
     passwordResetExpires: Date,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /* ================= PASSWORD HASH ================= */
