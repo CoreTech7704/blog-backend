@@ -8,7 +8,10 @@ const ADMIN_COOKIE = "adminToken";
 
 /* ================= LOGIN PAGE ================= */
 exports.loginPage = (req, res) => {
-  res.render("admin/login");
+  res.render("admin/login", {
+    error: null,
+    csrfToken: req.csrfToken(),
+  });
 };
 
 /* ================= ADMIN LOGIN ================= */

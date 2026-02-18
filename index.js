@@ -36,22 +36,11 @@ app.use(
 const PORT = process.env.PORT || 8000;
 
 /* =============== Rate Limits ================ */
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  message: "Too many attempts, try later",
-});
-
 const commentLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 20,
 });
 app.use("/api/blogs/:blogId/comments", commentLimiter);
-
-const readLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 300,
-});
 
 /* ================= DATABASE ================= */
 mongoose
@@ -69,6 +58,10 @@ app.set("trust proxy", 1);
 
 /* ================= VIEW ENGINE (ADMIN ONLY) ================= */
 app.set("view engine", "ejs");
+app.use(
+  "/bootstrap",
+  express.static("node_modules/bootstrap/dist")
+);
 app.set("views", path.resolve("./views"));
 
 /* ================= GLOBAL MIDDLEWARE ================= */
