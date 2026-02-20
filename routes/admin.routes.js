@@ -1,24 +1,88 @@
 const router = require("express").Router();
 const admin = require("../controllers/admin.controller");
 const adminAuth = require("../middlewares/admin/auth.middleware");
-const csrf = require("csurf");
-const csrfProtection = csrf({ cookie: true });
+const {
+    doubleCsrfProtection,
+    generateToken,
+} = require("../config/csrf");
 
 /* Auth */
-router.get("/login", admin.loginPage);
-router.post("/login", admin.login);
+router.get("/login", (req, res) => {
+    res.render("admin/login", {
+        csrfToken: generateToken(req, res),
+    });
+});
+router.post(
+    "/login",
+    doubleCsrfProtection,
+    admin.login
+);
 
 /* Protected */
-router.get("/dashboard", adminAuth, csrfProtection, admin.dashboard);
+router.get(
+    "/dashboard",
+    adminAuth,
+    (req, res) => {
+        res.render("admin/dashboard", {
+            csrfToken: generateToken(req, res),
+        });
+    }
+);
 
-router.get("/blogs", adminAuth, csrfProtection, admin.blogs);
-router.post("/blogs/:id/publish", adminAuth, csrfProtection, admin.publishBlog);
-router.post("/blogs/:id/unpublish", adminAuth, csrfProtection, admin.unpublishBlog);
-router.post("/blogs/:id/delete", adminAuth, csrfProtection, admin.deleteBlog);
+router.get(
+    "/blogs",
+    adminAuth,
+    (req, res) => {
+        res.render("admin/blogs", {
+            csrfToken: generateToken(req, res),
+        });
+    }
+);
 
-router.get("/categories", adminAuth, csrfProtection, admin.categories);
-router.post("/categories", adminAuth, csrfProtection, admin.createCategory);
-router.post("/categories/:id/delete", adminAuth, csrfProtection, admin.deleteCategory);
+router.post(
+    "/blogs/:id/publish",
+    adminAuth,
+    doubleCsrfProtection,
+    admin.publishBlog
+);
+
+router.post(
+    "/blogs/:id/unpublish",
+    adminAuth,
+    doubleCsrfProtection,
+    admin.unpublishBlog
+);
+
+router.post(
+    "/blogs/:id/delete",
+    adminAuth,
+    doubleCsrfProtection,
+    admin.deleteBlog
+);
+
+router.get(
+    "/categories",
+    adminAuth,
+    (req, res) => {
+        res.render("admin/categories", {
+            csrfToken: generateToken(req, res),
+        });
+    }
+);
+
+router.post(
+    "/categories",
+    adminAuth,
+    doubleCsrfProtection,
+    admin.createCategory
+);
+
+router.post(
+    "/categories/:id/delete",
+    adminAuth,
+    doubleCsrfProtection,
+    admin.deleteCategory
+);
 
 router.get("/users", adminAuth, admin.users);
 

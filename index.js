@@ -7,16 +7,8 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const methodOverride = require("method-override");
 const cookieParser = require("cookie-parser");
-const csrf = require("csurf");
 const cors = require("cors");
 const compression = require("compression");
-const csrfProtection = csrf({
-  cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-  },
-});
 
 const app = express();
 const normalizeOrigin = (url) =>
@@ -91,6 +83,7 @@ app.use(compression());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(cookieParser());
 
 app.use(express.static(path.resolve("./public")));
 app.use(methodOverride("_method"));
@@ -116,7 +109,7 @@ app.use("/api", require("./routes/api/comment.routes"));
 app.use("/api", require("./routes/contact.routes"));
 
 // Admin (EJS only)
-app.use("/admin", csrfProtection, require("./routes/admin.routes"));
+app.use("/admin", require("./routes/admin.routes"));
 
 
 /* ================= 404 HANDLER ================= */
