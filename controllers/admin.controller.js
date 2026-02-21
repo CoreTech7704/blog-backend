@@ -10,7 +10,6 @@ const ADMIN_COOKIE = "adminToken";
 exports.loginPage = (req, res) => {
   res.render("admin/login", {
     error: null,
-    csrfToken: generateToken(req, res),
   });
 };
 
@@ -70,7 +69,6 @@ exports.dashboard = async (req, res) => {
       users,
       blogs,
       categories,
-      csrfToken: generateToken(req, res),
     });
   } catch (err) {
     console.error("ADMIN DASHBOARD ERROR:", err);
@@ -87,7 +85,6 @@ exports.blogs = async (req, res) => {
 
     res.render("admin/blogs", {
       blogs,
-      csrfToken: generateToken(req, res),
     });
   } catch (err) {
     console.error("ADMIN BLOGS ERROR:", err);
@@ -138,7 +135,6 @@ exports.categories = async (req, res) => {
 
   res.render("admin/categories", {
     categories,
-    csrfToken: generateToken(req, res),
   });
 };
 
@@ -165,6 +161,5 @@ exports.users = async (req, res) => {
 
   res.render("admin/users", {
     users,
-    csrfToken: generateToken(req, res),
   });
 };

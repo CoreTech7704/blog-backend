@@ -1,89 +1,37 @@
 const router = require("express").Router();
 const admin = require("../controllers/admin.controller");
 const adminAuth = require("../middlewares/admin/auth.middleware");
-const {
-    doubleCsrfProtection,
-    generateToken,
-} = require("../config/csrf");
+const { doubleCsrfProtection } = require("../config/csrf");
+const csrfLocals = require("../middlewares/csrfLocals");
 
 /* Auth */
-router.get("/login", (req, res) => {
-    res.render("admin/login", {
-        csrfToken: generateToken(req, res),
-    });
-});
+router.get(
+  "/login",
+  doubleCsrfProtection,
+  csrfLocals,
+  admin.loginPage
+);
+
 router.post(
-    "/login",
-    doubleCsrfProtection,
-    admin.login
+  "/login",
+  doubleCsrfProtection,
+  admin.login
 );
 
 /* Protected */
-router.get(
-    "/dashboard",
-    adminAuth,
-    (req, res) => {
-        res.render("admin/dashboard", {
-            csrfToken: generateToken(req, res),
-        });
-    }
-);
+router.use(adminAuth, doubleCsrfProtection, csrfLocals);
 
-router.get(
-    "/blogs",
-    adminAuth,
-    (req, res) => {
-        res.render("admin/blogs", {
-            csrfToken: generateToken(req, res),
-        });
-    }
-);
+router.get("/dashboard", admin.dashboard);
+router.get("/blogs", admin.blogs);
 
-router.post(
-    "/blogs/:id/publish",
-    adminAuth,
-    doubleCsrfProtection,
-    admin.publishBlog
-);
+router.post("/blogs/:id/publish", admin.publishBlog);
+router.post("/blogs/:id/unpublish", admin.unpublishBlog);
+router.post("/blogs/:id/delete", admin.deleteBlog);
 
-router.post(
-    "/blogs/:id/unpublish",
-    adminAuth,
-    doubleCsrfProtection,
-    admin.unpublishBlog
-);
+router.get("/categories", admin.categories);
+router.post("/categories", admin.createCategory);
+router.post("/categories/:id/delete", admin.deleteCategory);
 
-router.post(
-    "/blogs/:id/delete",
-    adminAuth,
-    doubleCsrfProtection,
-    admin.deleteBlog
-);
-
-router.get(
-    "/categories",
-    adminAuth,
-    (req, res) => {
-        res.render("admin/categories", {
-            csrfToken: generateToken(req, res),
-        });
-    }
-);
-
-router.post(
-    "/categories",
-    adminAuth,
-    doubleCsrfProtection,
-    admin.createCategory
-);
-
-router.post(
-    "/categories/:id/delete",
-    adminAuth,
-    doubleCsrfProtection,
-    admin.deleteCategory
-);
-
-router.get("/users", adminAuth, admin.users);
+router.get("/users", admin.users);
 
 module.exports = router;
