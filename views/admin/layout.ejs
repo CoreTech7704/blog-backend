@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= title || 'Void Work Admin' %></title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css" />
+
+  <!-- Custom Admin Styles -->
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body class="bg-dark text-light">
+
+  <div class="d-flex admin-wrapper">
+    <!-- Sidebar -->
+    <%- include('partials/sidebar') %>
+
+    <!-- Main Content -->
+    <div class="flex-grow-1 admin-content">
+      <main class="p-4">
+        <%- body %>
+      </main>
+    </div>
+  </div>
+
+  <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

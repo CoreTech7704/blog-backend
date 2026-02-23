@@ -41,7 +41,10 @@ exports.login = async (req, res) => {
       sameSite: "strict",
     });
 
-    res.redirect("/admin/dashboard");
+    res.render("admin/overview", {
+      layout: "admin/layout",
+      title: "Overview"
+    });
   } catch (err) {
     console.error("ADMIN LOGIN ERROR:", err);
     res.render("admin/login", {
