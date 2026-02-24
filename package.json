@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "seed:Categories": "node scripts/seedCategories.js"
+    "seed:cleardatabase": "node scripts/cleardatabase.js"
   },
   "dependencies": {
     "@upstash/redis": "^1.36.2",
