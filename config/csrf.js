@@ -3,24 +3,17 @@ const jwt = require("jsonwebtoken");
 
 const getSessionIdentifier = (req) => {
   const token = req.cookies?.adminToken;
-
   if (!token) return "anonymous";
 
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.ADMIN_JWT_SECRET
-    );
-
-    return decoded.id; // unique per admin
+    const decoded = jwt.verify(token, process.env.ADMIN_JWT_SECRET);
+    return decoded.id;
   } catch {
     return "anonymous";
   }
 };
 
-const {
-  doubleCsrfProtection,
-} = doubleCsrf({
+const { doubleCsrfProtection } = doubleCsrf({
   getSecret: () => process.env.CSRF_SECRET,
   getSessionIdentifier,
   cookieName: "__Host-csrf",
@@ -31,4 +24,6 @@ const {
   },
 });
 
-module.exports = { doubleCsrfProtection };
+module.exports = {
+  csrfProtection: doubleCsrfProtection,
+};

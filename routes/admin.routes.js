@@ -1,37 +1,38 @@
 const router = require("express").Router();
 const admin = require("../controllers/admin.controller");
 const adminAuth = require("../middlewares/admin/auth.middleware");
-const { doubleCsrfProtection } = require("../config/csrf");
-const csrfLocals = require("../middlewares/csrfLocals");
+const { csrfProtection } = require("../config/csrf");
 
-/* Auth */
+// GET login page → CSRF middleware GENERATES token
 router.get(
   "/login",
-  doubleCsrfProtection,
-  csrfLocals,
-  admin.loginPage
+  csrfProtection,
+  (req, res) => {
+    res.render("admin/login", {
+      csrfToken: req.csrfToken,
+      error: null,
+    });
+  }
 );
 
-router.post(
-  "/login",
-  doubleCsrfProtection,
-  admin.login
-);
+// POST login → CSRF validates token
+router.post("/login", csrfProtection, admin.login);
 
-/* Protected */
-router.use(adminAuth, doubleCsrfProtection, csrfLocals);
+router.use(adminAuth);
 
 router.get("/dashboard", admin.dashboard);
 router.get("/blogs", admin.blogs);
 
-router.post("/blogs/:id/publish", admin.publishBlog);
-router.post("/blogs/:id/unpublish", admin.unpublishBlog);
-router.post("/blogs/:id/delete", admin.deleteBlog);
+router.post("/blogs/:id/publish", csrfProtection, admin.publishBlog);
+router.post("/blogs/:id/unpublish", csrfProtection, admin.unpublishBlog);
+router.post("/blogs/:id/delete", csrfProtection, admin.deleteBlog);
 
 router.get("/categories", admin.categories);
-router.post("/categories", admin.createCategory);
-router.post("/categories/:id/delete", admin.deleteCategory);
+router.post("/categories", csrfProtection, admin.createCategory);
+router.post("/categories/:id/delete", csrfProtection, admin.deleteCategory);
 
 router.get("/users", admin.users);
+
+router.post("/logout", csrfProtection, admin.logout);
 
 module.exports = router;

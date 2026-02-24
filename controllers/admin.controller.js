@@ -3,12 +3,13 @@ const Blog = require("../models/blog");
 const Category = require("../models/Category");
 const { delCache } = require("../utils/cache");
 const jwt = require("jsonwebtoken");
-
+const { generateCsrfToken } = require("../config/csrf");
 const ADMIN_COOKIE = "adminToken";
 
 /* ================= LOGIN PAGE ================= */
 exports.loginPage = (req, res) => {
   res.render("admin/login", {
+    csrfToken: generateCsrfToken(req, res),
     error: null,
   });
 };
@@ -41,10 +42,7 @@ exports.login = async (req, res) => {
       sameSite: "strict",
     });
 
-    res.render("admin/overview", {
-      layout: "admin/layout",
-      title: "Overview"
-    });
+    res.redirect("/admin/dashboard");
   } catch (err) {
     console.error("ADMIN LOGIN ERROR:", err);
     res.render("admin/login", {
