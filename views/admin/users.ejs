@@ -1,0 +1,76 @@
+<section class="mb-4">
+  <h2 class="fw-semibold mb-1">User Management</h2>
+  <p class="text-muted">View, search, and manage platform users.</p>
+</section>
+
+<div class="card admin-panel p-3">
+  <!-- Search & Filter -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <input
+      type="text"
+      class="form-control w-50"
+      placeholder="Search users by name or email"
+    />
+    <button class="btn btn-primary">+ Add New User</button>
+  </div>
+
+  <!-- Users Table -->
+  <div class="table-responsive">
+    <table class="table table-dark table-striped align-middle text-light">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Username</th>
+          <th scope="col">Email</th>
+          <th scope="col">Role</th>
+          <th scope="col">Status</th>
+          <th scope="col" class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 🔹 Sample Row -->
+        <tr>
+          <td>1</td>
+          <td>john_doe</td>
+          <td>john@example.com</td>
+          <td>member</td>
+          <td><span class="badge bg-success">Active</span></td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-info">View</button>
+            <button class="btn btn-sm btn-outline-warning">Edit</button>
+            <button class="btn btn-sm btn-outline-danger">Delete</button>
+          </td>
+        </tr>
+
+        <!-- Duplicate sample entries -->
+        <tr>
+          <td>2</td>
+          <td>alice_w</td>
+          <td>alice@example.com</td>
+          <td>member</td>
+          <td><span class="badge bg-success">Active</span></td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-info">View</button>
+            <button class="btn btn-sm btn-outline-warning">Edit</button>
+            <button class="btn btn-sm btn-outline-danger">Delete</button>
+          </td>
+        </tr>
+
+        <tr>
+          <td>3</td>
+          <td>mark_b</td>
+          <td>mark@example.com</td>
+          <td>admin</td>
+          <td><span class="badge bg-secondary">Inactive</span></td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-info">View</button>
+            <button class="btn btn-sm btn-outline-warning">Edit</button>
+            <button class="btn btn-sm btn-outline-danger">Delete</button>
+          </td>
+        </tr>
+
+        <!-- Add more rows as needed -->
+      </tbody>
+    </table>
+  </div>
+</div>

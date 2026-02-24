@@ -9,6 +9,7 @@ const methodOverride = require("method-override");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const compression = require("compression");
+const expressLayouts = require("express-ejs-layouts");
 
 const app = express();
 const normalizeOrigin = (url) =>
@@ -50,11 +51,12 @@ app.set("trust proxy", 1);
 
 /* ================= VIEW ENGINE (ADMIN ONLY) ================= */
 app.set("view engine", "ejs");
-app.use(
-  "/bootstrap",
-  express.static("node_modules/bootstrap/dist")
-);
 app.set("views", path.resolve("./views"));
+app.use(expressLayouts);
+app.set("layout", "admin/layout");
+// Serve static files
+app.use("/css", express.static("public/css"));
+app.use("/bootstrap", express.static("node_modules/bootstrap/dist"));
 
 /* ================= GLOBAL MIDDLEWARE ================= */
 app.use(

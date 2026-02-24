@@ -1,38 +1,45 @@
 const router = require("express").Router();
-const admin = require("../controllers/admin.controller");
-const adminAuth = require("../middlewares/admin/auth.middleware");
-const { csrfProtection } = require("../config/csrf");
 
-// GET login page → CSRF middleware GENERATES token
-router.get(
-  "/login",
-  csrfProtection,
-  (req, res) => {
-    res.render("admin/login", {
-      csrfToken: req.csrfToken,
-      error: null,
-    });
-  }
-);
+router.get("/", (req, res) => {
+  res.render("admin/overview", {
+    title: "Overview",
+  });
+});
 
-// POST login → CSRF validates token
-router.post("/login", csrfProtection, admin.login);
+router.get("/users", (req, res) => {
+  res.render("admin/users", {
+    title: "User Management",
+  });
+});
 
-router.use(adminAuth);
+router.get("/blogs", (req, res) => {
+  res.render("admin/blogs", {
+    title: "Blog Moderation",
+  });
+});
 
-router.get("/dashboard", admin.dashboard);
-router.get("/blogs", admin.blogs);
+router.get("/categories", (req, res) => {
+  res.render("admin/categories", {
+    title: "Categories",
+  });
+});
 
-router.post("/blogs/:id/publish", csrfProtection, admin.publishBlog);
-router.post("/blogs/:id/unpublish", csrfProtection, admin.unpublishBlog);
-router.post("/blogs/:id/delete", csrfProtection, admin.deleteBlog);
+router.get("/approvals", (req, res) => {
+  res.render("admin/approvals", {
+    title: "Admin Approvals",
+  });
+});
 
-router.get("/categories", admin.categories);
-router.post("/categories", csrfProtection, admin.createCategory);
-router.post("/categories/:id/delete", csrfProtection, admin.deleteCategory);
+router.get("/contacts", (req, res) => {
+  res.render("admin/contacts", {
+    title: "Contact Reports",
+  });
+});
 
-router.get("/users", admin.users);
-
-router.post("/logout", csrfProtection, admin.logout);
+router.get("/analysis", (req, res) => {
+  res.render("admin/analysis", {
+    title: "Platform Analysis",
+  });
+});
 
 module.exports = router;

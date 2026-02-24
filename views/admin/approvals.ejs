@@ -1,0 +1,97 @@
+<section class="mb-4">
+  <h2 class="fw-semibold mb-1">Admin Approvals & Notes</h2>
+  <p class="text-muted">
+    Internal notes, approvals, and coordination between admins
+  </p>
+</section>
+
+<div class="row g-3">
+  <!-- Create Note -->
+  <div class="col-lg-4">
+    <div class="admin-panel">
+      <h5 class="panel-title">Create New Note</h5>
+
+      <form>
+        <div class="mb-3">
+          <label class="form-label">Title</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="e.g. Approve new category"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Priority</label>
+          <select class="form-select">
+            <option>Normal</option>
+            <option>High</option>
+            <option>Critical</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Note</label>
+          <textarea
+            class="form-control"
+            rows="4"
+            placeholder="Write details for other admins..."
+          ></textarea>
+        </div>
+
+        <button type="button" class="btn btn-primary w-100">
+          Post Note
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Notes Feed -->
+  <div class="col-lg-8">
+    <div class="admin-panel">
+      <h5 class="panel-title">Admin Notes</h5>
+
+      <div class="admin-note critical">
+        <div class="note-header">
+          <strong>Security Review Required</strong>
+          <span class="badge bg-danger">Critical</span>
+        </div>
+        <p class="note-body">
+          Review reported blogs related to phishing attempts.
+        </p>
+        <div class="note-footer">
+          <span>Posted by <strong>super_admin</strong></span>
+          <span>2 hours ago</span>
+        </div>
+      </div>
+
+      <div class="admin-note high">
+        <div class="note-header">
+          <strong>Approve New Category</strong>
+          <span class="badge bg-warning text-dark">High</span>
+        </div>
+        <p class="note-body">
+          Request to add “AI Tools” category for upcoming blogs.
+        </p>
+        <div class="note-footer">
+          <span>Posted by <strong>editor_admin</strong></span>
+          <span>Yesterday</span>
+        </div>
+      </div>
+
+      <div class="admin-note normal">
+        <div class="note-header">
+          <strong>Weekly Maintenance</strong>
+          <span class="badge bg-secondary">Normal</span>
+        </div>
+        <p class="note-body">
+          Scheduled server maintenance this Sunday at 2 AM UTC.
+        </p>
+        <div class="note-footer">
+          <span>Posted by <strong>ops_admin</strong></span>
+          <span>2 days ago</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

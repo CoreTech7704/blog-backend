@@ -1,0 +1,126 @@
+<section class="mb-4">
+  <h2 class="fw-semibold mb-1">Blog Moderation</h2>
+  <p class="text-muted">
+    Review, publish, draft, or remove blog posts
+  </p>
+</section>
+
+<div class="admin-panel p-3">
+  <!-- Top Controls -->
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <input
+      type="text"
+      class="form-control w-50"
+      placeholder="Search blogs by title or author"
+    />
+
+    <div class="d-flex gap-2">
+      <select class="form-select">
+        <option>Status: All</option>
+        <option>Published</option>
+        <option>Draft</option>
+        <option>Reported</option>
+      </select>
+
+      <button class="btn btn-outline-primary">
+        Filter
+      </button>
+    </div>
+  </div>
+
+  <!-- Blogs Table -->
+  <div class="table-responsive">
+    <table class="table table-dark table-hover align-middle text-light">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <!-- Row -->
+        <tr>
+          <td>1</td>
+          <td>How AI Is Changing Web Development</td>
+          <td>john_doe</td>
+          <td>
+            <span class="badge bg-success">Published</span>
+          </td>
+          <td>12 Feb 2026</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-warning">Draft</button>
+            <button class="btn btn-sm btn-outline-danger">Delete</button>
+          </td>
+        </tr>
+
+        <!-- Row -->
+        <tr>
+          <td>2</td>
+          <td>Why Dark Mode Improves UX</td>
+          <td>alice_w</td>
+          <td>
+            <span class="badge bg-secondary">Draft</span>
+          </td>
+          <td>10 Feb 2026</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-success">Publish</button>
+            <button class="btn btn-sm btn-outline-danger">Delete</button>
+          </td>
+        </tr>
+
+        <!-- Row -->
+        <tr>
+          <td>3</td>
+          <td>Top 10 JavaScript Security Mistakes</td>
+          <td>mark_b</td>
+          <td>
+            <span class="badge bg-warning text-dark">Reported</span>
+          </td>
+          <td>09 Feb 2026</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-info">Review</button>
+            <button class="btn btn-sm btn-outline-danger">Delete</button>
+          </td>
+        </tr>
+
+        <!-- Row -->
+        <tr>
+          <td>4</td>
+          <td>Scaling Node.js Applications</td>
+          <td>dev_sam</td>
+          <td>
+            <span class="badge bg-success">Published</span>
+          </td>
+          <td>05 Feb 2026</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-warning">Draft</button>
+            <button class="btn btn-sm btn-outline-danger">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination (UI only) -->
+  <nav class="d-flex justify-content-end mt-3">
+    <ul class="pagination pagination-sm mb-0">
+      <li class="page-item disabled">
+        <span class="page-link">Prev</span>
+      </li>
+      <li class="page-item active">
+        <span class="page-link">1</span>
+      </li>
+      <li class="page-item">
+        <span class="page-link">2</span>
+      </li>
+      <li class="page-item">
+        <span class="page-link">Next</span>
+      </li>
+    </ul>
+  </nav>
+</div>

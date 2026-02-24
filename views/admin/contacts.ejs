@@ -1,0 +1,106 @@
+<section class="mb-4">
+  <h2 class="fw-semibold mb-1">Contact Form Reports</h2>
+  <p class="text-muted">
+    Messages submitted via the Contact Us form
+  </p>
+</section>
+
+<div class="admin-panel p-3">
+  <!-- Filters -->
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <input
+      type="text"
+      class="form-control w-50"
+      placeholder="Search by name, email, or subject"
+    />
+
+    <select class="form-select w-auto">
+      <option>All</option>
+      <option>Unread</option>
+      <option>Resolved</option>
+      <option>Spam</option>
+    </select>
+  </div>
+
+  <!-- Reports Table -->
+  <div class="table-responsive">
+    <table class="table table-dark table-hover align-middle text-light">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Subject</th>
+          <th>Status</th>
+          <th>Received</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Rahul Patel</td>
+          <td>rahul@email.com</td>
+          <td>Account Issue</td>
+          <td>
+            <span class="badge bg-warning text-dark">Unread</span>
+          </td>
+          <td>Today</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-info">View</button>
+            <button class="btn btn-sm btn-outline-success">Resolve</button>
+            <button class="btn btn-sm btn-outline-danger">Delete</button>
+          </td>
+        </tr>
+
+        <tr>
+          <td>2</td>
+          <td>Anita Sharma</td>
+          <td>anita@email.com</td>
+          <td>Feedback</td>
+          <td>
+            <span class="badge bg-success">Resolved</span>
+          </td>
+          <td>Yesterday</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-info">View</button>
+            <button class="btn btn-sm btn-outline-danger">Delete</button>
+          </td>
+        </tr>
+
+        <tr>
+          <td>3</td>
+          <td>Unknown</td>
+          <td>spam@fake.com</td>
+          <td>Promotion</td>
+          <td>
+            <span class="badge bg-secondary">Spam</span>
+          </td>
+          <td>2 days ago</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-danger">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <nav class="d-flex justify-content-end mt-3">
+    <ul class="pagination pagination-sm mb-0">
+      <li class="page-item disabled">
+        <span class="page-link">Prev</span>
+      </li>
+      <li class="page-item active">
+        <span class="page-link">1</span>
+      </li>
+      <li class="page-item">
+        <span class="page-link">2</span>
+      </li>
+      <li class="page-item">
+        <span class="page-link">Next</span>
+      </li>
+    </ul>
+  </nav>
+</div>

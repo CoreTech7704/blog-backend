@@ -1,0 +1,122 @@
+<section class="mb-4">
+  <h2 class="fw-semibold mb-1">Categories Management</h2>
+  <p class="text-muted">
+    Add, edit, or remove blog categories
+  </p>
+</section>
+
+<div class="row g-3">
+  <!-- Add Category -->
+  <div class="col-lg-4">
+    <div class="admin-panel">
+      <h5 class="panel-title">Add New Category</h5>
+
+      <form>
+        <div class="mb-3">
+          <label class="form-label">Category Name</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="e.g. Technology"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea
+            class="form-control"
+            rows="3"
+            placeholder="Short category description"
+          ></textarea>
+        </div>
+
+        <button type="button" class="btn btn-primary w-100">
+          Add Category
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Categories List -->
+  <div class="col-lg-8">
+    <div class="admin-panel">
+      <h5 class="panel-title">Existing Categories</h5>
+
+      <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle text-light">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Category</th>
+              <th>Description</th>
+              <th>Blogs</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Technology</td>
+              <td>AI, Web, Mobile, Cloud</td>
+              <td>42</td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-warning">
+                  Edit
+                </button>
+                <button class="btn btn-sm btn-outline-danger">
+                  Delete
+                </button>
+              </td>
+            </tr>
+
+            <tr>
+              <td>2</td>
+              <td>Design</td>
+              <td>UI, UX, Product Design</td>
+              <td>18</td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-warning">
+                  Edit
+                </button>
+                <button class="btn btn-sm btn-outline-danger">
+                  Delete
+                </button>
+              </td>
+            </tr>
+
+            <tr>
+              <td>3</td>
+              <td>Programming</td>
+              <td>JavaScript, Python, Backend</td>
+              <td>27</td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-warning">
+                  Edit
+                </button>
+                <button class="btn btn-sm btn-outline-danger">
+                  Delete
+                </button>
+              </td>
+            </tr>
+
+            <tr>
+              <td>4</td>
+              <td>DevOps</td>
+              <td>CI/CD, Docker, Cloud Infra</td>
+              <td>11</td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-warning">
+                  Edit
+                </button>
+                <button class="btn btn-sm btn-outline-danger">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

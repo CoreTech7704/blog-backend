@@ -47,7 +47,9 @@
           <h3 class="text-center text-primary fw-semibold mb-4">Admin Login</h3>
 
           <form action="/admin/login" method="POST">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <% if (typeof csrfToken !== "undefined") { %>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <% } %>
             <!-- Email -->
             <div class="mb-3">
               <label class="form-label">Email</label>
