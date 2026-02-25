@@ -1,0 +1,87 @@
+<section class="mb-4">
+  <h2 class="fw-semibold text-info mb-1">Comment Moderation</h2>
+  <p class="text-soft">
+    Review, approve, or remove user comments
+  </p>
+</section>
+
+<div class="admin-panel panel-surface p-3">
+  <!-- Filters -->
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <input
+      type="text"
+      class="form-control w-50"
+      placeholder="Search by content or username"
+    />
+
+    <select class="form-select w-auto">
+      <option value="">All</option>
+      <option value="approved">Approved</option>
+      <option value="pending">Pending</option>
+    </select>
+  </div>
+
+  <!-- Comments Table -->
+  <div class="table-responsive">
+    <table class="table table-dark table-hover align-middle text-light">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>User</th>
+          <th>Blog</th>
+          <th>Comment</th>
+          <th>Status</th>
+          <th>Posted</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% comments.forEach((c, index) => { %>
+          <tr>
+            <td><%= index + 1 %></td>
+
+            <td><%= c.user?.username || "—" %></td>
+            <td><%= c.blog?.title || "—" %></td>
+
+            <td class="text-truncate" style="max-width: 280px;">
+              <%= c.content %>
+            </td>
+
+            <td>
+              <% if (c.isApproved) { %>
+                <span class="badge bg-success">Approved</span>
+              <% } else { %>
+                <span class="badge bg-warning text-dark">Pending</span>
+              <% } %>
+            </td>
+
+            <td>
+              <%= new Date(c.createdAt).toLocaleDateString() %>
+            </td>
+
+            <td class="text-end d-flex gap-1 justify-content-end">
+              <% if (!c.isApproved) { %>
+                <form method="POST" action="/admin/comments/<%= c._id %>/approve">
+                  <button class="btn btn-sm btn-outline-success">
+                    Approve
+                  </button>
+                </form>
+              <% } %>
+
+              <form
+                method="POST"
+                action="/admin/comments/<%= c._id %>/delete"
+                onsubmit="return confirm('Delete this comment?')"
+              >
+                <button class="btn btn-sm btn-outline-danger">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>

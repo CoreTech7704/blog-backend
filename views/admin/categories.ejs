@@ -11,13 +11,14 @@
     <div class="admin-panel panel-surface">
       <h5 class="panel-title">Add New Category</h5>
 
-      <form>
+      <form method="POST" action="/admin/categories">
         <div class="mb-3">
           <label class="form-label">Category Name</label>
           <input
             type="text"
             class="form-control"
             placeholder="e.g. Technology"
+            name="Category"
           />
         </div>
 
@@ -47,57 +48,37 @@
           </thead>
 
           <tbody>
-            <tr>
-              <td>1</td>
-              <td>Technology</td>
-              <td class="text-soft">technology</td>
-              <td>42</td>
-              <td>12 Feb 2026</td>
-              <td class="text-end">
-                <button class="btn btn-sm btn-outline-danger">
-                  Delete
-                </button>
-              </td>
-            </tr>
+            <% categories.forEach((cat, index) => { %>
+              <tr>
+                <td><%= index + 1 %></td>
 
-            <tr>
-              <td>2</td>
-              <td>Design</td>
-              <td class="text-soft">design</td>
-              <td>18</td>
-              <td>09 Feb 2026</td>
-              <td class="text-end">
-                <button class="btn btn-sm btn-outline-danger">
-                  Delete
-                </button>
-              </td>
-            </tr>
+                <td><%= cat.name %></td>
 
-            <tr>
-              <td>3</td>
-              <td>Programming</td>
-              <td class="text-soft">programming</td>
-              <td>27</td>
-              <td>05 Feb 2026</td>
-              <td class="text-end">
-                <button class="btn btn-sm btn-outline-danger">
-                  Delete
-                </button>
-              </td>
-            </tr>
+                <td class="text-soft">
+                  <%= cat.slug %>
+                </td>
 
-            <tr>
-              <td>4</td>
-              <td>DevOps</td>
-              <td class="text-soft">devops</td>
-              <td>11</td>
-              <td>01 Feb 2026</td>
-              <td class="text-end">
-                <button class="btn btn-sm btn-outline-danger">
-                  Delete
-                </button>
-              </td>
-            </tr>
+                <td>
+                  <%= blogCountMap[cat._id.toString()] || 0 %>
+                </td>
+
+                <td>
+                  <%= new Date(cat.createdAt).toLocaleDateString() %>
+                </td>
+
+                <td class="text-end">
+                  <form
+                    method="POST"
+                    action="/admin/categories/<%= cat._id %>/delete"
+                    onsubmit="return confirm('Delete this category?')"
+                  >
+                    <button class="btn btn-sm btn-outline-danger">
+                      Delete
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
           </tbody>
         </table>
       </div>

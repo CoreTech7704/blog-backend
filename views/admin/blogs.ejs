@@ -39,96 +39,76 @@
       </thead>
 
       <tbody>
-        <!-- Sample Row -->
-        <tr>
-          <td>1</td>
-          <td>How AI Is Changing Web Development</td>
-          <td>john_doe</td>
-          <td>Technology</td>
+        <% blogs.forEach((blog, index) => { %>
+          <tr>
+            <td><%= index + 1 %></td>
 
-          <td>
-            <span class="badge bg-success">Published</span>
-          </td>
+            <td><%= blog.title %></td>
+            <td><%= blog.author?.username || "—" %></td>
+            <td><%= blog.category?.name || "—" %></td>
 
-          <td>
-            <span class="badge bg-success">Yes</span>
-          </td>
+            <td>
+              <% if (blog.status === "published") { %>
+                <span class="badge bg-success">Published</span>
+              <% } else { %>
+                <span class="badge bg-secondary">Draft</span>
+              <% } %>
+            </td>
 
-          <td>1,248</td>
-          <td>12 Feb 2026</td>
+            <td>
+              <% if (blog.featured) { %>
+                <span class="badge bg-success">Yes</span>
+              <% } else { %>
+                <span class="badge bg-secondary">No</span>
+              <% } %>
+            </td>
 
-          <td class="text-end">
-            <button class="btn btn-sm btn-outline-warning">
-              Draft
-            </button>
-            <button class="btn btn-sm btn-outline-info">
-              Unfeature
-            </button>
-            <button class="btn btn-sm btn-outline-danger">
-              Delete
-            </button>
-          </td>
-        </tr>
+            <td><%= blog.views %></td>
 
-        <tr>
-          <td>2</td>
-          <td>Why Dark Mode Improves UX</td>
-          <td>alice_w</td>
-          <td>Design</td>
+            <td>
+              <%= new Date(blog.createdAt).toLocaleDateString() %>
+            </td>
 
-          <td>
-            <span class="badge bg-secondary">Draft</span>
-          </td>
+            <td class="text-end d-flex gap-1 justify-content-end">
+              <!-- Publish / Draft -->
+              <form
+                method="POST"
+                action="/admin/blogs/<%= blog._id %>/toggle-status"
+              >
+                <% if (blog.status === "published") { %>
+                  <button class="btn btn-sm btn-outline-warning">
+                    Draft
+                  </button>
+                <% } else { %>
+                  <button class="btn btn-sm btn-outline-success">
+                    Publish
+                  </button>
+                <% } %>
+              </form>
 
-          <td>
-            <span class="badge bg-secondary">No</span>
-          </td>
+              <!-- Feature -->
+              <form
+                method="POST"
+                action="/admin/blogs/<%= blog._id %>/toggle-featured"
+              >
+                <button class="btn btn-sm btn-outline-info">
+                  <%= blog.featured ? "Unfeature" : "Feature" %>
+                </button>
+              </form>
 
-          <td>112</td>
-          <td>10 Feb 2026</td>
-
-          <td class="text-end">
-            <button class="btn btn-sm btn-outline-success">
-              Publish
-            </button>
-            <button class="btn btn-sm btn-outline-info">
-              Feature
-            </button>
-            <button class="btn btn-sm btn-outline-danger">
-              Delete
-            </button>
-          </td>
-        </tr>
-
-        <tr>
-          <td>3</td>
-          <td>Scaling Node.js Applications</td>
-          <td>dev_sam</td>
-          <td>Backend</td>
-
-          <td>
-            <span class="badge bg-success">Published</span>
-          </td>
-
-          <td>
-            <span class="badge bg-secondary">No</span>
-          </td>
-
-          <td>824</td>
-          <td>05 Feb 2026</td>
-
-          <td class="text-end">
-            <button class="btn btn-sm btn-outline-warning">
-              Draft
-            </button>
-            <button class="btn btn-sm btn-outline-info">
-              Feature
-            </button>
-            <button class="btn btn-sm btn-outline-danger">
-              Delete
-            </button>
-          </td>
-        </tr>
+              <!-- Delete -->
+              <form
+                method="POST"
+                action="/admin/blogs/<%= blog._id %>/delete"
+                onsubmit="return confirm('Delete this blog?')"
+              >
+                <button class="btn btn-sm btn-outline-danger">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
       </tbody>
     </table>
   </div>

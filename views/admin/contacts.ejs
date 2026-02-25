@@ -37,36 +37,82 @@
       </thead>
 
       <tbody>
-        <tr>
-          <td>1</td>
-          <td>Rahul Patel</td>
-          <td>rahul@email.com</td>
-          <td>Account Issue</td>
-          <td>
-            <span class="badge bg-warning text-dark">Unread</span>
-          </td>
-          <td>Today</td>
-          <td class="text-end">
-            <button class="btn btn-sm btn-outline-info">View</button>
-            <button class="btn btn-sm btn-outline-success">Mark Read</button>
-            <button class="btn btn-sm btn-outline-danger">Delete</button>
-          </td>
-        </tr>
+        <% contacts.forEach((c, index) => { %>
+          <tr>
+            <td><%= index + 1 %></td>
 
-        <tr>
-          <td>2</td>
-          <td>Anita Sharma</td>
-          <td>anita@email.com</td>
-          <td>Feedback</td>
-          <td>
-            <span class="badge bg-success">Read</span>
-          </td>
-          <td>Yesterday</td>
-          <td class="text-end">
-            <button class="btn btn-sm btn-outline-info">View</button>
-            <button class="btn btn-sm btn-outline-danger">Delete</button>
-          </td>
-        </tr>
+            <td><%= c.name %></td>
+            <td><%= c.email %></td>
+            <td><%= c.subject || "—" %></td>
+
+            <td>
+              <% if (c.isRead) { %>
+                <span class="badge bg-success">Read</span>
+              <% } else { %>
+                <span class="badge bg-warning text-dark">Unread</span>
+              <% } %>
+            </td>
+
+            <td>
+              <%= new Date(c.createdAt).toLocaleDateString() %>
+            </td>
+
+            <td class="text-end d-flex gap-1 justify-content-end">
+              <!-- View -->
+              <button
+                class="btn btn-sm btn-outline-info"
+                data-bs-toggle="modal"
+                data-bs-target="#view-<%= c._id %>"
+              >
+                View
+              </button>
+
+              <!-- Mark Read -->
+              <% if (!c.isRead) { %>
+                <form
+                  method="POST"
+                  action="/admin/contacts/<%= c._id %>/read"
+                >
+                  <button class="btn btn-sm btn-outline-success">
+                    Mark Read
+                  </button>
+                </form>
+              <% } %>
+
+              <!-- Delete -->
+              <form
+                method="POST"
+                action="/admin/contacts/<%= c._id %>/delete"
+                onsubmit="return confirm('Delete this message?')"
+              >
+                <button class="btn btn-sm btn-outline-danger">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+
+          <!-- View Modal -->
+          <div class="modal fade" id="view-<%= c._id %>" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+              <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                  <h5 class="modal-title">
+                    <%= c.subject || "Message" %>
+                  </h5>
+                  <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                  <p><strong>Name:</strong> <%= c.name %></p>
+                  <p><strong>Email:</strong> <%= c.email %></p>
+                  <hr />
+                  <p><%= c.message %></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
       </tbody>
     </table>
   </div>

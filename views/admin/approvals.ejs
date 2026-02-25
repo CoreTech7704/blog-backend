@@ -11,10 +11,11 @@
     <div class="admin-panel panel-surface">
       <h5 class="panel-title">Create New Note</h5>
 
-      <form>
+      <form method="POST" action="/admin/approvals">
         <div class="mb-3">
           <label class="form-label">Title</label>
           <input
+            name="title"
             type="text"
             class="form-control"
             placeholder="e.g. Approve new category"
@@ -23,7 +24,7 @@
 
         <div class="mb-3">
           <label class="form-label">Priority</label>
-          <select class="form-select">
+          <select name="priority" class="form-select">
             <option value="normal">Normal</option>
             <option value="high">High</option>
             <option value="critical">Critical</option>
@@ -34,6 +35,7 @@
         <div class="mb-3">
           <label class="form-label">Note</label>
           <textarea
+            name="body"
             class="form-control"
             rows="4"
             placeholder="Write details for other admins..."
@@ -52,47 +54,45 @@
     <div class="admin-panel panel-surface">
       <h5 class="panel-title">Admin Notes</h5>
 
-      <div class="admin-note critical">
-        <div class="note-header">
-          <strong>Security Review Required</strong>
-          <span class="badge bg-danger">Critical</span>
-        </div>
-        <p class="note-body">
-          Review reported blogs related to phishing attempts.
-        </p>
-        <div class="note-footer">
-          <span>Posted by <strong>super_admin</strong></span>
-          <span>2 hours ago</span>
-        </div>
-      </div>
+      <% notes.forEach(note => { %>
+        <div class="admin-note <%= note.priority %>">
+          <div class="note-header">
+            <strong><%= note.title %></strong>
 
-      <div class="admin-note high">
-        <div class="note-header">
-          <strong>Approve New Category</strong>
-          <span class="badge bg-warning text-dark">High</span>
-        </div>
-        <p class="note-body">
-          Request to add “AI Tools” category for upcoming blogs.
-        </p>
-        <div class="note-footer">
-          <span>Posted by <strong>editor_admin</strong></span>
-          <span>Yesterday</span>
-        </div>
-      </div>
+            <% if (note.priority === "critical") { %>
+              <span class="badge bg-danger">Critical</span>
+            <% } else if (note.priority === "high") { %>
+              <span class="badge bg-warning text-dark">High</span>
+            <% } else { %>
+              <span class="badge bg-secondary">Normal</span>
+            <% } %>
+          </div>
 
-      <div class="admin-note normal">
-        <div class="note-header">
-          <strong>Weekly Maintenance</strong>
-          <span class="badge bg-secondary">Normal</span>
+          <p class="note-body">
+            <%= note.body %>
+          </p>
+
+          <div class="note-footer">
+            <span>
+              Posted by <strong><%= note.createdBy?.username || "admin" %></strong>
+            </span>
+
+            <span>
+              <%= new Date(note.createdAt).toLocaleString() %>
+            </span>
+          </div>
+
+          <form
+            method="POST"
+            action="/admin/approvals/<%= note._id %>/delete"
+            class="mt-2"
+          >
+            <button class="btn btn-sm btn-outline-danger">
+              Delete
+            </button>
+          </form>
         </div>
-        <p class="note-body">
-          Scheduled server maintenance this Sunday at 2 AM UTC.
-        </p>
-        <div class="note-footer">
-          <span>Posted by <strong>ops_admin</strong></span>
-          <span>2 days ago</span>
-        </div>
-      </div>
+      <% }) %>
     </div>
   </div>
 </div>

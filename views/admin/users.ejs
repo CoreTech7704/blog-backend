@@ -33,96 +33,61 @@
       </thead>
 
       <tbody>
-        <!-- Sample Row -->
-        <tr>
-          <td>1</td>
-          <td>John Doe</td>
-          <td>john_doe</td>
-          <td>john@example.com</td>
+        <% users.forEach((user, index) => { %>
+          <tr>
+            <td><%= index + 1 %></td>
 
-          <td>
-            <span class="badge bg-primary">User</span>
-          </td>
+            <td><%= user.fullname %></td>
+            <td><%= user.username %></td>
+            <td><%= user.email %></td>
 
-          <td>
-            <span class="badge bg-secondary">No</span>
-          </td>
+            <td>
+              <% if (user.role === "admin") { %>
+                <span class="badge bg-danger">Admin</span>
+              <% } else { %>
+                <span class="badge bg-primary">User</span>
+              <% } %>
+            </td>
 
-          <td>
-            <span class="badge bg-success">Active</span>
-          </td>
+            <td>
+              <% if (user.isAuthor) { %>
+                <span class="badge bg-success">Yes</span>
+              <% } else { %>
+                <span class="badge bg-secondary">No</span>
+              <% } %>
+            </td>
 
-          <td>12 Feb 2026</td>
+            <td>
+              <% if (user.isActive) { %>
+                <span class="badge bg-success">Active</span>
+              <% } else { %>
+                <span class="badge bg-secondary">Inactive</span>
+              <% } %>
+            </td>
 
-          <td class="text-end">
-            <button class="btn btn-sm btn-outline-info">
-              View
-            </button>
-            <button class="btn btn-sm btn-outline-warning">
-              Deactivate
-            </button>
-          </td>
-        </tr>
+            <td>
+              <%= new Date(user.createdAt).toLocaleDateString() %>
+            </td>
 
-        <tr>
-          <td>2</td>
-          <td>Alice Walker</td>
-          <td>alice_w</td>
-          <td>alice@example.com</td>
-
-          <td>
-            <span class="badge bg-primary">User</span>
-          </td>
-
-          <td>
-            <span class="badge bg-success">Yes</span>
-          </td>
-
-          <td>
-            <span class="badge bg-success">Active</span>
-          </td>
-
-          <td>09 Feb 2026</td>
-
-          <td class="text-end">
-            <button class="btn btn-sm btn-outline-info">
-              View
-            </button>
-            <button class="btn btn-sm btn-outline-warning">
-              Deactivate
-            </button>
-          </td>
-        </tr>
-
-        <tr>
-          <td>3</td>
-          <td>Mark Brown</td>
-          <td>mark_b</td>
-          <td>mark@example.com</td>
-
-          <td>
-            <span class="badge bg-danger">Admin</span>
-          </td>
-
-          <td>
-            <span class="badge bg-secondary">No</span>
-          </td>
-
-          <td>
-            <span class="badge bg-secondary">Inactive</span>
-          </td>
-
-          <td>01 Feb 2026</td>
-
-          <td class="text-end">
-            <button class="btn btn-sm btn-outline-info">
-              View
-            </button>
-            <button class="btn btn-sm btn-outline-success">
-              Activate
-            </button>
-          </td>
-        </tr>
+            <td class="text-end">
+              <form
+                method="POST"
+                action="/admin/users/<%= user._id %>/toggle-status"
+                class="d-inline"
+              >
+                <% if (user.isActive) { %>
+                  <button class="btn btn-sm btn-outline-warning">
+                    Deactivate
+                  </button>
+                <% } else { %>
+                  <button class="btn btn-sm btn-outline-success">
+                    Activate
+                  </button>
+                <% } %>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
       </tbody>
     </table>
   </div>

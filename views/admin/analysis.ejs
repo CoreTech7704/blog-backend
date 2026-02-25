@@ -10,7 +10,9 @@
   <div class="col-xl-3 col-md-6">
     <div class="admin-stat-card">
       <div class="stat-label">Application Status</div>
-      <div class="stat-value text-success">Running</div>
+      <div class="stat-value text-success">
+        <%= status.app %>
+      </div>
       <div class="stat-meta">Server is online</div>
     </div>
   </div>
@@ -18,7 +20,9 @@
   <div class="col-xl-3 col-md-6">
     <div class="admin-stat-card">
       <div class="stat-label">Database</div>
-      <div class="stat-value text-success">Connected</div>
+      <div class="stat-value <%= status.db === 'Connected' ? 'text-success' : 'text-danger' %>">
+        <%= status.db %>
+      </div>
       <div class="stat-meta">MongoDB</div>
     </div>
   </div>
@@ -26,7 +30,9 @@
   <div class="col-xl-3 col-md-6">
     <div class="admin-stat-card">
       <div class="stat-label">Cache</div>
-      <div class="stat-value text-success">Healthy</div>
+      <div class="stat-value <%= status.redis === 'Healthy' ? 'text-success' : 'text-warning' %>">
+        <%= status.redis %>
+      </div>
       <div class="stat-meta">Redis</div>
     </div>
   </div>
@@ -34,7 +40,9 @@
   <div class="col-xl-3 col-md-6">
     <div class="admin-stat-card">
       <div class="stat-label">Data Records</div>
-      <div class="stat-value">Growing</div>
+      <div class="stat-value">
+        <%= stats.totalUsers + stats.totalBlogs + stats.totalComments %>
+      </div>
       <div class="stat-meta">Users · Blogs · Comments</div>
     </div>
   </div>
@@ -55,7 +63,9 @@
 
         <li class="list-group-item bg-transparent d-flex justify-content-between">
           <span>MongoDB</span>
-          <span class="text-success">Connected</span>
+          <span class="<%= status.db === 'Connected' ? 'text-success' : 'text-danger' %>">
+            <%= status.db %>
+          </span>
         </li>
 
         <li class="list-group-item bg-transparent d-flex justify-content-between">
@@ -64,8 +74,10 @@
         </li>
 
         <li class="list-group-item bg-transparent d-flex justify-content-between">
-          <span>Contact Cleanup</span>
-          <span class="text-info">TTL Enabled</span>
+          <span>Unread Contacts</span>
+          <span class="<%= stats.unreadContacts > 0 ? 'text-warning' : 'text-success' %>">
+            <%= stats.unreadContacts %>
+          </span>
         </li>
 
         <li class="list-group-item bg-transparent d-flex justify-content-between">
@@ -84,23 +96,26 @@
       <ul class="activity-list">
         <li>
           <span class="dot green"></span>
-          New users registered recently
-          <span class="time">Last 24h</span>
+          <%= stats.totalUsers %> users registered
+          <span class="time">Total</span>
         </li>
+
         <li>
           <span class="dot blue"></span>
-          Blogs published steadily
-          <span class="time">This week</span>
+          <%= stats.totalBlogs %> blogs published
+          <span class="time">Overall</span>
         </li>
+
         <li>
           <span class="dot orange"></span>
-          Draft blogs pending review
-          <span class="time">Ongoing</span>
+          <%= stats.draftBlogs %> drafts pending review
+          <span class="time">Action needed</span>
         </li>
+
         <li>
           <span class="dot red"></span>
-          Unread contact messages
-          <span class="time">Attention needed</span>
+          <%= stats.unreadContacts %> unread contact messages
+          <span class="time">Attention</span>
         </li>
       </ul>
     </div>

@@ -1,59 +1,20 @@
 const router = require("express").Router();
+const { overviewPage } = require("../controllers/admin/overview.controller");
+const usersRoutes = require("./admin/users.routes");
+const blogsRoutes = require("./admin/blogs.routes");
+const categoriesRoutes = require("./admin/categories.routes");
+const approvalsRoutes = require("./admin/approvals.routes");
+const analysisRoutes = require("./admin/analysis.routes");
+const contactsRoutes = require("./admin/contacts.routes");
+const commentsRoutes = require("./admin/comments.routes");
 
-router.get("/", (req, res) => {
-  res.render("admin/overview", {
-    layout: "admin/layout",
-    title: "Dashboard",
-    activePage: "dashboard",
-  });
-});
-
-router.get("/users", (req, res) => {
-  res.render("admin/users", {
-    layout: "admin/layout",
-    title: "User Management",
-    activePage: "users",
-  });
-});
-
-router.get("/blogs", (req, res) => {
-  res.render("admin/blogs", {
-    layout: "admin/layout",
-    title: "Blog Moderation",
-    activePage: "blogs",
-  });
-});
-
-router.get("/categories", (req, res) => {
-  res.render("admin/categories", {
-    layout: "admin/layout",
-    title: "Categories",
-    activePage: "categories",
-  });
-});
-
-router.get("/approvals", (req, res) => {
-  res.render("admin/approvals", {
-    layout: "admin/layout",
-    title: "Admin Approvals",
-    activePage: "approvals",
-  });
-});
-
-router.get("/contacts", (req, res) => {
-  res.render("admin/contacts", {
-    layout: "admin/layout",
-    title: "Contact Reports",
-    activePage: "contacts",
-  });
-});
-
-router.get("/analysis", (req, res) => {
-  res.render("admin/analysis", {
-    layout: "admin/layout",
-    title: "Platform Analysis",
-    activePage: "analysis",
-  });
-});
+router.get("/", overviewPage);
+router.use("/users", usersRoutes);
+router.use("/blogs", blogsRoutes);
+router.use("/categories", categoriesRoutes);
+router.use("/approvals", approvalsRoutes);
+router.use("/contacts", contactsRoutes);
+router.use("/analysis", analysisRoutes);
+router.use("/comments", commentsRoutes);
 
 module.exports = router;

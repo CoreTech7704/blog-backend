@@ -1,9 +1,11 @@
+const { Schema, model } = require("mongoose");
+
 const adminNoteSchema = new Schema(
   {
     title: {
       type: String,
       required: true,
-      trim: true,
+      maxlength: 150,
     },
 
     body: {
@@ -19,12 +21,6 @@ const adminNoteSchema = new Schema(
       index: true,
     },
 
-    status: {
-      type: String,
-      enum: ["open", "resolved"],
-      default: "open",
-    },
-
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -33,3 +29,5 @@ const adminNoteSchema = new Schema(
   },
   { timestamps: true }
 );
+
+module.exports = model("AdminNote", adminNoteSchema);
