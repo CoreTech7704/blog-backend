@@ -26,7 +26,7 @@ body {
 
 /* LAYOUT */
 .admin-sidebar {
-  width: 260px;
+  width: 300px;
   min-height: 100vh;
   background: linear-gradient(180deg, #0b1218, var(--bg-main));
   border-right: 1px solid var(--border-soft);
