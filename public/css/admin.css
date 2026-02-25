@@ -8,6 +8,7 @@
   --border-faint: rgba(255, 255, 255, 0.05);
 
   --text-muted: #9ca3af;
+  --text-muted-strong: #b6c2cf;
   --text-soft: #6b7280;
   --text-main: #e5e7eb;
 
@@ -37,10 +38,12 @@ body {
 
 /* SIDEBAR NAV */
 .admin-sidebar .nav-link {
+  display: flex;
+  align-items: center;
   color: var(--text-muted);
   border-radius: 8px;
   padding: 10px 14px;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .admin-sidebar .nav-link:hover {
@@ -55,10 +58,7 @@ body {
 
 /* DASHBOARD STATS */
 .admin-stat-card {
-  background-color: var(--bg-panel);
-  border-radius: 14px;
   padding: 20px;
-  border: 1px solid var(--border-soft);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -85,11 +85,14 @@ body {
 }
 
 /* PANELS */
-.admin-panel {
+.panel-surface {
   background-color: var(--bg-panel);
   border-radius: 14px;
-  padding: 20px;
   border: 1px solid var(--border-soft);
+}
+
+.admin-panel {
+  padding: 20px;
   height: 100%;
 }
 
@@ -110,6 +113,7 @@ body {
   align-items: center;
   gap: 10px;
   padding: 10px 0;
+  color: var(--text-main);
   border-bottom: 1px solid var(--border-faint);
   font-size: 0.9rem;
 }
@@ -121,7 +125,8 @@ body {
 .activity-list .time {
   margin-left: auto;
   font-size: 0.75rem;
-  color: var(--text-soft);
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
 /* Dots */
@@ -189,7 +194,7 @@ textarea:focus {
 
 .note-body {
   font-size: 0.9rem;
-  color: #d1d5db;
+  color: var(--text-main);
   margin-bottom: 10px;
 }
 
@@ -204,4 +209,22 @@ textarea:focus {
 .list-group-item {
   border-color: var(--border-faint);
   font-size: 0.9rem;
+}
+
+.panel-title {
+  color: var(--text-main);
+  letter-spacing: 0.3px;
+}
+
+.admin-panel .list-group-item span:first-child {
+  color: var(--text-muted-strong);
+  font-weight: 500;
+}
+
+.admin-panel .list-group-item span:last-child {
+  font-weight: 600;
+}
+
+.admin-panel .text-muted {
+  color: #8b98a5 !important;
 }

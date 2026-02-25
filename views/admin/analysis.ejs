@@ -1,7 +1,7 @@
 <section class="mb-4">
   <h2 class="fw-semibold text-info mb-1">Platform Analysis</h2>
   <p class="text-soft">
-    Monitor system health, activity, and platform performance
+    Application health, data growth, and system connectivity
   </p>
 </section>
 
@@ -9,64 +9,68 @@
 <div class="row g-3 mb-4">
   <div class="col-xl-3 col-md-6">
     <div class="admin-stat-card">
-      <div class="stat-label">Server Status</div>
-      <div class="stat-value text-success">Online</div>
-      <div class="stat-meta">Uptime: 99.98%</div>
+      <div class="stat-label">Application Status</div>
+      <div class="stat-value text-success">Running</div>
+      <div class="stat-meta">Server is online</div>
     </div>
   </div>
 
   <div class="col-xl-3 col-md-6">
     <div class="admin-stat-card">
-      <div class="stat-label">Active Users</div>
-      <div class="stat-value">412</div>
-      <div class="stat-meta">Last 24 hours</div>
+      <div class="stat-label">Database</div>
+      <div class="stat-value text-success">Connected</div>
+      <div class="stat-meta">MongoDB</div>
     </div>
   </div>
 
   <div class="col-xl-3 col-md-6">
     <div class="admin-stat-card">
-      <div class="stat-label">Requests / Min</div>
-      <div class="stat-value">1,248</div>
-      <div class="stat-meta">Avg traffic</div>
+      <div class="stat-label">Cache</div>
+      <div class="stat-value text-success">Healthy</div>
+      <div class="stat-meta">Redis</div>
     </div>
   </div>
 
   <div class="col-xl-3 col-md-6">
     <div class="admin-stat-card">
-      <div class="stat-label">Error Rate</div>
-      <div class="stat-value text-warning">0.12%</div>
-      <div class="stat-meta">Last hour</div>
+      <div class="stat-label">Data Records</div>
+      <div class="stat-value">Growing</div>
+      <div class="stat-meta">Users · Blogs · Comments</div>
     </div>
   </div>
 </div>
 
 <!-- System Panels -->
 <div class="row g-3">
-  <!-- Server Health -->
+  <!-- System Health -->
   <div class="col-lg-6">
-    <div class="admin-panel">
-      <h5 class="panel-title">Server Health</h5>
+    <div class="admin-panel panel-surface">
+      <h5 class="panel-title">System Health</h5>
 
       <ul class="list-group list-group-flush text-light">
         <li class="list-group-item bg-transparent d-flex justify-content-between">
-          <span>CPU Usage</span>
-          <span class="text-warning">68%</span>
+          <span>API Server</span>
+          <span class="text-success">Online</span>
         </li>
+
         <li class="list-group-item bg-transparent d-flex justify-content-between">
-          <span>Memory Usage</span>
-          <span class="text-success">54%</span>
-        </li>
-        <li class="list-group-item bg-transparent d-flex justify-content-between">
-          <span>Disk Space</span>
-          <span class="text-danger">82%</span>
-        </li>
-        <li class="list-group-item bg-transparent d-flex justify-content-between">
-          <span>Database</span>
+          <span>MongoDB</span>
           <span class="text-success">Connected</span>
         </li>
+
         <li class="list-group-item bg-transparent d-flex justify-content-between">
           <span>Redis Cache</span>
-          <span class="text-success">Healthy</span>
+          <span class="text-success">Connected</span>
+        </li>
+
+        <li class="list-group-item bg-transparent d-flex justify-content-between">
+          <span>Contact Cleanup</span>
+          <span class="text-info">TTL Enabled</span>
+        </li>
+
+        <li class="list-group-item bg-transparent d-flex justify-content-between">
+          <span>Background Jobs</span>
+          <span class="text-success">Running</span>
         </li>
       </ul>
     </div>
@@ -74,39 +78,39 @@
 
   <!-- Activity Summary -->
   <div class="col-lg-6">
-    <div class="admin-panel">
-      <h5 class="panel-title">Activity Summary</h5>
+    <div class="admin-panel panel-surface">
+      <h5 class="panel-title">Platform Summary</h5>
 
       <ul class="activity-list">
         <li>
           <span class="dot green"></span>
-          New user registrations spiked
-          <span class="time">Today</span>
-        </li>
-        <li>
-          <span class="dot blue"></span>
-          Blog publishing rate stable
+          New users registered recently
           <span class="time">Last 24h</span>
         </li>
         <li>
+          <span class="dot blue"></span>
+          Blogs published steadily
+          <span class="time">This week</span>
+        </li>
+        <li>
           <span class="dot orange"></span>
-          Minor latency increase detected
-          <span class="time">2h ago</span>
+          Draft blogs pending review
+          <span class="time">Ongoing</span>
         </li>
         <li>
           <span class="dot red"></span>
-          Failed login attempts blocked
-          <span class="time">Yesterday</span>
+          Unread contact messages
+          <span class="time">Attention needed</span>
         </li>
       </ul>
     </div>
   </div>
 </div>
 
-<!-- Placeholder Charts -->
-<div class="admin-panel mt-4">
-  <h5 class="panel-title">Traffic & Usage Trends</h5>
+<!-- Future Metrics -->
+<div class="admin-panel panel-surface mt-4">
+  <h5 class="panel-title">Usage Trends</h5>
   <div class="text-muted text-center py-5">
-    📊 Charts will appear here (traffic, users, blogs, errors)
+    📊 Analytics & trends will appear here in future updates
   </div>
 </div>

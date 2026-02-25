@@ -1,14 +1,14 @@
 <section class="mb-4">
   <h2 class="fw-semibold text-info mb-1">Categories Management</h2>
   <p class="text-soft">
-    Add, edit, or remove blog categories
+    Create and manage blog categories
   </p>
 </section>
 
 <div class="row g-3">
   <!-- Add Category -->
   <div class="col-lg-4">
-    <div class="admin-panel">
+    <div class="admin-panel panel-surface">
       <h5 class="panel-title">Add New Category</h5>
 
       <form>
@@ -30,7 +30,7 @@
 
   <!-- Categories List -->
   <div class="col-lg-8">
-    <div class="admin-panel">
+    <div class="admin-panel panel-surface">
       <h5 class="panel-title">Existing Categories</h5>
 
       <div class="table-responsive">
@@ -38,9 +38,10 @@
           <thead>
             <tr>
               <th>#</th>
-              <th>Category</th>
-              <th>Description</th>
+              <th>Name</th>
+              <th>Slug</th>
               <th>Blogs</th>
+              <th>Created</th>
               <th class="text-end">Actions</th>
             </tr>
           </thead>
@@ -49,12 +50,10 @@
             <tr>
               <td>1</td>
               <td>Technology</td>
-              <td>AI, Web, Mobile, Cloud</td>
+              <td class="text-soft">technology</td>
               <td>42</td>
+              <td>12 Feb 2026</td>
               <td class="text-end">
-                <button class="btn btn-sm btn-outline-warning">
-                  Edit
-                </button>
                 <button class="btn btn-sm btn-outline-danger">
                   Delete
                 </button>
@@ -64,12 +63,10 @@
             <tr>
               <td>2</td>
               <td>Design</td>
-              <td>UI, UX, Product Design</td>
+              <td class="text-soft">design</td>
               <td>18</td>
+              <td>09 Feb 2026</td>
               <td class="text-end">
-                <button class="btn btn-sm btn-outline-warning">
-                  Edit
-                </button>
                 <button class="btn btn-sm btn-outline-danger">
                   Delete
                 </button>
@@ -79,12 +76,10 @@
             <tr>
               <td>3</td>
               <td>Programming</td>
-              <td>JavaScript, Python, Backend</td>
+              <td class="text-soft">programming</td>
               <td>27</td>
+              <td>05 Feb 2026</td>
               <td class="text-end">
-                <button class="btn btn-sm btn-outline-warning">
-                  Edit
-                </button>
                 <button class="btn btn-sm btn-outline-danger">
                   Delete
                 </button>
@@ -94,12 +89,10 @@
             <tr>
               <td>4</td>
               <td>DevOps</td>
-              <td>CI/CD, Docker, Cloud Infra</td>
+              <td class="text-soft">devops</td>
               <td>11</td>
+              <td>01 Feb 2026</td>
               <td class="text-end">
-                <button class="btn btn-sm btn-outline-warning">
-                  Edit
-                </button>
                 <button class="btn btn-sm btn-outline-danger">
                   Delete
                 </button>

@@ -1,5 +1,3 @@
-const { Schema, model } = require("mongoose");
-
 const adminNoteSchema = new Schema(
   {
     title: {
@@ -8,15 +6,23 @@ const adminNoteSchema = new Schema(
       trim: true,
     },
 
-    message: {
+    body: {
       type: String,
       required: true,
+      maxlength: 2000,
     },
 
     priority: {
       type: String,
       enum: ["normal", "high", "critical"],
       default: "normal",
+      index: true,
+    },
+
+    status: {
+      type: String,
+      enum: ["open", "resolved"],
+      default: "open",
     },
 
     createdBy: {
@@ -27,5 +33,3 @@ const adminNoteSchema = new Schema(
   },
   { timestamps: true }
 );
-
-module.exports = model("AdminNote", adminNoteSchema);

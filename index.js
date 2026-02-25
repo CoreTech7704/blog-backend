@@ -57,6 +57,10 @@ app.set("layout", "admin/layout");
 // Serve static files
 app.use("/css", express.static("public/css"));
 app.use("/bootstrap", express.static("node_modules/bootstrap/dist"));
+app.use((req, res, next) => {
+  res.locals.activePage = null;
+  next();
+});
 
 /* ================= GLOBAL MIDDLEWARE ================= */
 app.use(

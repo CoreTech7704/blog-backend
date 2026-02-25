@@ -1,34 +1,57 @@
 <aside class="admin-sidebar d-flex flex-column p-3">
+  <!-- Brand -->
   <div class="sidebar-brand mb-4">
-    <h4 class="fw-bold text-info">VOID WORK</h4>
+    <h4 class="fw-bold text-info mb-0">VOID WORK</h4>
     <small class="text-soft">Admin Panel</small>
   </div>
 
   <ul class="nav nav-pills flex-column gap-1">
     <li class="nav-item">
-      <a href="/admin" class="nav-link active">Overview</a>
+      <a href="/admin" class="nav-link <%= activePage === 'dashboard' ? 'active' : '' %>">
+        Dashboard
+      </a>
     </li>
+
     <li class="nav-item">
-      <a href="/admin/users" class="nav-link">User Management</a>
+      <a href="/admin/users" class="nav-link <%= activePage === 'users' ? 'active' : '' %>">
+        Users
+      </a>
     </li>
+
     <li class="nav-item">
-      <a href="/admin/blogs" class="nav-link">Blog Moderation</a>
+      <a href="/admin/blogs" class="nav-link <%= activePage === 'blogs' ? 'active' : '' %>">
+        Blogs
+      </a>
     </li>
+
     <li class="nav-item">
-      <a href="/admin/categories" class="nav-link">Categories Management</a>
+      <a href="/admin/categories" class="nav-link <%= activePage === 'categories' ? 'active' : '' %>">
+        Categories
+      </a>
     </li>
+
     <li class="nav-item">
-      <a href="/admin/approvals" class="nav-link">Admin Approvals</a>
+      <a href="/admin/approvals" class="nav-link <%= activePage === 'approvals' ? 'active' : '' %>">
+        Admin Notes
+      </a>
     </li>
+
     <li class="nav-item">
-      <a href="/admin/contacts" class="nav-link">Contact Form Reports</a>
+      <a href="/admin/contacts" class="nav-link <%= activePage === 'contacts' ? 'active' : '' %>">
+        Messages
+      </a>
     </li>
+
     <li class="nav-item">
-      <a href="/admin/analysis" class="nav-link">Platform Analysis</a>
+      <a href="/admin/analysis" class="nav-link <%= activePage === 'analysis' ? 'active' : '' %>">
+        System Status
+      </a>
     </li>
 
     <li class="nav-item mt-auto">
-      <a href="/admin/logout" class="nav-link text-danger">Logout</a>
+      <a href="/admin/logout" class="nav-link text-danger">
+        Sign Out
+      </a>
     </li>
   </ul>
 </aside>

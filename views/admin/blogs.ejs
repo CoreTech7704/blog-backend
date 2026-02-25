@@ -1,31 +1,24 @@
 <section class="mb-4">
   <h2 class="fw-semibold text-info mb-1">Blog Moderation</h2>
   <p class="text-soft">
-    Review, publish, draft, or remove blog posts
+    Publish, draft, feature, or remove blog posts
   </p>
 </section>
 
-<div class="admin-panel p-3">
+<div class="admin-panel panel-surface p-3">
   <!-- Top Controls -->
   <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
     <input
       type="text"
       class="form-control w-50"
-      placeholder="Search blogs by title or author"
+      placeholder="Search by title or author"
     />
 
-    <div class="d-flex gap-2">
-      <select class="form-select">
-        <option>Status: All</option>
-        <option>Published</option>
-        <option>Draft</option>
-        <option>Reported</option>
-      </select>
-
-      <button class="btn btn-outline-primary">
-        Filter
-      </button>
-    </div>
+    <select class="form-select w-auto">
+      <option value="">Status: All</option>
+      <option value="published">Published</option>
+      <option value="draft">Draft</option>
+    </select>
   </div>
 
   <!-- Blogs Table -->
@@ -36,77 +29,111 @@
           <th>#</th>
           <th>Title</th>
           <th>Author</th>
+          <th>Category</th>
           <th>Status</th>
+          <th>Featured</th>
+          <th>Views</th>
           <th>Created</th>
           <th class="text-end">Actions</th>
         </tr>
       </thead>
 
       <tbody>
-        <!-- Row -->
+        <!-- Sample Row -->
         <tr>
           <td>1</td>
           <td>How AI Is Changing Web Development</td>
           <td>john_doe</td>
+          <td>Technology</td>
+
           <td>
             <span class="badge bg-success">Published</span>
           </td>
+
+          <td>
+            <span class="badge bg-success">Yes</span>
+          </td>
+
+          <td>1,248</td>
           <td>12 Feb 2026</td>
+
           <td class="text-end">
-            <button class="btn btn-sm btn-outline-warning">Draft</button>
-            <button class="btn btn-sm btn-outline-danger">Delete</button>
+            <button class="btn btn-sm btn-outline-warning">
+              Draft
+            </button>
+            <button class="btn btn-sm btn-outline-info">
+              Unfeature
+            </button>
+            <button class="btn btn-sm btn-outline-danger">
+              Delete
+            </button>
           </td>
         </tr>
 
-        <!-- Row -->
         <tr>
           <td>2</td>
           <td>Why Dark Mode Improves UX</td>
           <td>alice_w</td>
+          <td>Design</td>
+
           <td>
             <span class="badge bg-secondary">Draft</span>
           </td>
+
+          <td>
+            <span class="badge bg-secondary">No</span>
+          </td>
+
+          <td>112</td>
           <td>10 Feb 2026</td>
+
           <td class="text-end">
-            <button class="btn btn-sm btn-outline-success">Publish</button>
-            <button class="btn btn-sm btn-outline-danger">Delete</button>
+            <button class="btn btn-sm btn-outline-success">
+              Publish
+            </button>
+            <button class="btn btn-sm btn-outline-info">
+              Feature
+            </button>
+            <button class="btn btn-sm btn-outline-danger">
+              Delete
+            </button>
           </td>
         </tr>
 
-        <!-- Row -->
         <tr>
           <td>3</td>
-          <td>Top 10 JavaScript Security Mistakes</td>
-          <td>mark_b</td>
-          <td>
-            <span class="badge bg-warning text-dark">Reported</span>
-          </td>
-          <td>09 Feb 2026</td>
-          <td class="text-end">
-            <button class="btn btn-sm btn-outline-info">Review</button>
-            <button class="btn btn-sm btn-outline-danger">Delete</button>
-          </td>
-        </tr>
-
-        <!-- Row -->
-        <tr>
-          <td>4</td>
           <td>Scaling Node.js Applications</td>
           <td>dev_sam</td>
+          <td>Backend</td>
+
           <td>
             <span class="badge bg-success">Published</span>
           </td>
+
+          <td>
+            <span class="badge bg-secondary">No</span>
+          </td>
+
+          <td>824</td>
           <td>05 Feb 2026</td>
+
           <td class="text-end">
-            <button class="btn btn-sm btn-outline-warning">Draft</button>
-            <button class="btn btn-sm btn-outline-danger">Delete</button>
+            <button class="btn btn-sm btn-outline-warning">
+              Draft
+            </button>
+            <button class="btn btn-sm btn-outline-info">
+              Feature
+            </button>
+            <button class="btn btn-sm btn-outline-danger">
+              Delete
+            </button>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- Pagination (UI only) -->
+  <!-- Pagination -->
   <nav class="d-flex justify-content-end mt-3">
     <ul class="pagination pagination-sm mb-0">
       <li class="page-item disabled">

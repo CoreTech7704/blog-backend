@@ -1,14 +1,14 @@
 <section class="mb-4">
-  <h2 class="fw-semibold text-info mb-1">Admin Approvals & Notes</h2>
+  <h2 class="fw-semibold text-info mb-1">Admin Notes</h2>
   <p class="text-soft">
-    Internal notes, approvals, and coordination between admins
+    Internal notes and coordination between administrators
   </p>
 </section>
 
 <div class="row g-3">
   <!-- Create Note -->
   <div class="col-lg-4">
-    <div class="admin-panel">
+    <div class="admin-panel panel-surface">
       <h5 class="panel-title">Create New Note</h5>
 
       <form>
@@ -24,10 +24,11 @@
         <div class="mb-3">
           <label class="form-label">Priority</label>
           <select class="form-select">
-            <option>Normal</option>
-            <option>High</option>
-            <option>Critical</option>
+            <option value="normal">Normal</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
           </select>
+          
         </div>
 
         <div class="mb-3">
@@ -48,7 +49,7 @@
 
   <!-- Notes Feed -->
   <div class="col-lg-8">
-    <div class="admin-panel">
+    <div class="admin-panel panel-surface">
       <h5 class="panel-title">Admin Notes</h5>
 
       <div class="admin-note critical">

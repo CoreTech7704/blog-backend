@@ -23,34 +23,34 @@
 <!-- Stats Cards -->
 <div class="row g-3 mb-4">
   <div class="col-xl-3 col-md-6">
-    <div class="admin-stat-card">
+    <div class="admin-stat-card panel-surface">
       <div class="stat-label">Total Users</div>
       <div class="stat-value">1,248</div>
-      <div class="stat-meta">+12 today</div>
+      <div class="stat-meta">Active & inactive users</div>
     </div>
   </div>
 
   <div class="col-xl-3 col-md-6">
-    <div class="admin-stat-card">
+    <div class="admin-stat-card panel-surface">
       <div class="stat-label">Total Blogs</div>
       <div class="stat-value">342</div>
-      <div class="stat-meta">18 drafts</div>
+      <div class="stat-meta">Published & drafts</div>
     </div>
   </div>
 
   <div class="col-xl-3 col-md-6">
-    <div class="admin-stat-card">
+    <div class="admin-stat-card panel-surface">
       <div class="stat-label">Categories</div>
       <div class="stat-value">18</div>
-      <div class="stat-meta">2 inactive</div>
+      <div class="stat-meta">Available blog categories</div>
     </div>
   </div>
 
   <div class="col-xl-3 col-md-6">
-    <div class="admin-stat-card">
-      <div class="stat-label">Reports</div>
+    <div class="admin-stat-card panel-surface">
+      <div class="stat-label">Contact Reports</div>
       <div class="stat-value text-warning">7</div>
-      <div class="stat-meta">Needs review</div>
+      <div class="stat-meta">Unread messages</div>
     </div>
   </div>
 </div>
@@ -59,28 +59,31 @@
 <div class="row g-3">
   <!-- Recent Activity -->
   <div class="col-lg-7">
-    <div class="admin-panel">
+    <div class="admin-panel panel-surface">
       <h5 class="panel-title">Recent Platform Activity</h5>
 
       <ul class="activity-list">
         <li>
           <span class="dot blue"></span>
-          New blog submitted by <strong>john_doe</strong>
+          Blog <strong>“How AI Is Changing Web”</strong> submitted
           <span class="time">2 min ago</span>
         </li>
+
         <li>
           <span class="dot green"></span>
-          User <strong>alice</strong> registered
+          New user <strong>alice</strong> registered
           <span class="time">10 min ago</span>
         </li>
+
         <li>
           <span class="dot orange"></span>
-          Blog reported for policy review
+          Comment awaiting moderation
           <span class="time">1 hour ago</span>
         </li>
+
         <li>
           <span class="dot red"></span>
-          Comment removed by admin
+          Contact report marked urgent
           <span class="time">3 hours ago</span>
         </li>
       </ul>
@@ -89,23 +92,27 @@
 
   <!-- Quick Actions -->
   <div class="col-lg-5">
-    <div class="admin-panel">
+    <div class="admin-panel panel-surface">
       <h5 class="panel-title">Quick Admin Actions</h5>
 
       <div class="d-grid gap-2">
         <button class="btn btn-outline-primary">
           Review Pending Blogs
         </button>
+
         <button class="btn btn-outline-primary">
           Manage Users
         </button>
+
         <button class="btn btn-outline-warning">
-          View Reports
+          View Contact Reports
         </button>
-        <button class="btn btn-outline-danger">
-          Platform Maintenance Mode
+
+        <button class="btn btn-outline-info">
+          View Admin Notes
         </button>
       </div>
     </div>
   </div>
+</div>
 </div>
