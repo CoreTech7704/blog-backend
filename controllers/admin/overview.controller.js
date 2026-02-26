@@ -65,7 +65,7 @@ exports.overviewPage = async (req, res) => {
     res.render("admin/overview", {
       layout: "admin/layout",
       title: "Dashboard",
-      activePage: "overview",
+      activePage: "dashboard",
 
       stats: {
         totalUsers,

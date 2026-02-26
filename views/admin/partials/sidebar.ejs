@@ -7,7 +7,7 @@
 
   <ul class="nav nav-pills flex-column gap-1">
     <li class="nav-item">
-      <a href="/admin" class="nav-link <%= activePage === 'dashboard' ? 'active' : '' %>">
+      <a href="/admin/dashboard" class="nav-link <%= activePage === 'dashboard' ? 'active' : '' %>">
         Overview
       </a>
     </li>
@@ -55,9 +55,15 @@
     </li>
 
     <li class="nav-item mt-auto">
-      <a href="/admin/logout" class="nav-link text-danger">
-        Sign Out
-      </a>
+      <form action="/admin/logout" method="POST">
+        <button
+          type="submit"
+          class="nav-link text-danger w-100 text-start"
+          style="background: none; border: none;"
+        >
+          Sign Out
+        </button>
+      </form>
     </li>
   </ul>
 </aside>

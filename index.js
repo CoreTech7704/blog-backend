@@ -89,7 +89,6 @@ app.use(compression());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
-app.use(cookieParser());
 
 app.use(express.static(path.resolve("./public")));
 app.use(methodOverride("_method"));

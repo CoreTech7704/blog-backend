@@ -7,14 +7,31 @@ const approvalsRoutes = require("./admin/approvals.routes");
 const analysisRoutes = require("./admin/analysis.routes");
 const contactsRoutes = require("./admin/contacts.routes");
 const commentsRoutes = require("./admin/comments.routes");
+const adminLogin = require("../controllers/admin/adminAuth.controller").adminLogin;
+const authAdmin = require("../middlewares/authAdmin");
 
-router.get("/", overviewPage);
-router.use("/users", usersRoutes);
-router.use("/blogs", blogsRoutes);
-router.use("/categories", categoriesRoutes);
-router.use("/approvals", approvalsRoutes);
-router.use("/contacts", contactsRoutes);
-router.use("/analysis", analysisRoutes);
-router.use("/comments", commentsRoutes);
+// Admin auth controller
+router.get("/login", (req, res) => {
+  res.render("login", { error: null });
+});
+router.post("/auth/login", adminLogin);
+
+// Protected admin routes
+router.get("/dashboard", authAdmin, overviewPage);
+router.use("/users", authAdmin, usersRoutes);
+router.use("/blogs", authAdmin, blogsRoutes);
+router.use("/categories", authAdmin, categoriesRoutes);
+router.use("/approvals", authAdmin, approvalsRoutes);
+router.use("/contacts", authAdmin, contactsRoutes);
+router.use("/analysis", authAdmin, analysisRoutes);
+router.use("/comments", authAdmin, commentsRoutes);
+
+router.post("/logout", (req, res) => {
+  res
+    .clearCookie("admin_access_token")
+    .clearCookie("admin_refresh_token");
+
+  return res.redirect("/admin/login");
+});
 
 module.exports = router;
