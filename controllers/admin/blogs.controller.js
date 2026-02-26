@@ -46,3 +46,29 @@ exports.deleteBlog = async (req, res) => {
   await Blog.findByIdAndDelete(req.params.id);
   res.redirect("/admin/blogs");
 };
+
+/* SEARCH BLOGS */
+exports.listBlogs = async (req, res) => {
+  const { q, status } = req.query;
+
+  let filter = {};
+
+  if (q) {
+    filter.title = { $regex: q, $options: "i" };
+  }
+
+  if (status) {
+    filter.status = status;
+  }
+
+  const blogs = await Blog.find(filter)
+    .populate("author category")
+    .sort({ createdAt: -1 });
+
+  res.render("admin/blogs", {
+    title: "Blogs",
+    activePage: "blogs",
+    blogs,
+    query: { q, status },
+  });
+};

@@ -8,17 +8,23 @@
 <div class="admin-panel panel-surface p-3">
   <!-- Top Controls -->
   <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-    <input
-      type="text"
-      class="form-control w-50"
-      placeholder="Search by title or author"
-    />
+    <form method="GET" action="/admin/blogs" class="d-flex gap-2">
+      <input
+        type="text"
+        name="q"
+        class="form-control"
+        placeholder="Search by title or author"
+        value="<%= query?.q || '' %>"
+      />
 
-    <select class="form-select w-auto">
-      <option value="">Status: All</option>
-      <option value="published">Published</option>
-      <option value="draft">Draft</option>
-    </select>
+      <select name="status" class="form-select w-auto">
+        <option value="">Status: All</option>
+        <option value="published" <%= query?.status === 'published' ? 'selected' : '' %>>Published</option>
+        <option value="draft" <%= query?.status === 'draft' ? 'selected' : '' %>>Draft</option>
+      </select>
+
+      <button class="btn btn-outline-info">Filter</button>
+    </form>
   </div>
 
   <!-- Blogs Table -->
@@ -69,45 +75,120 @@
               <%= new Date(blog.createdAt).toLocaleDateString() %>
             </td>
 
-            <td class="text-end d-flex gap-1 justify-content-end">
-              <!-- Publish / Draft -->
-              <form
-                method="POST"
-                action="/admin/blogs/<%= blog._id %>/toggle-status"
-              >
-                <% if (blog.status === "published") { %>
-                  <button class="btn btn-sm btn-outline-warning">
-                    Draft
-                  </button>
-                <% } else { %>
-                  <button class="btn btn-sm btn-outline-success">
-                    Publish
-                  </button>
-                <% } %>
-              </form>
+            <td class="text-end p-2">
+              <div class="action-grid">
 
-              <!-- Feature -->
-              <form
-                method="POST"
-                action="/admin/blogs/<%= blog._id %>/toggle-featured"
-              >
-                <button class="btn btn-sm btn-outline-info">
-                  <%= blog.featured ? "Unfeature" : "Feature" %>
-                </button>
-              </form>
+                <!-- Publish / Draft -->
+                <form
+                  method="POST"
+                  action="/admin/blogs/<%= blog._id %>/toggle-status"
+                >
+                  <% if (blog.status === "published") { %>
+                    <button class="btn btn-sm btn-outline-warning w-100">
+                      Draft
+                    </button>
+                  <% } else { %>
+                    <button class="btn btn-sm btn-outline-success w-100">
+                      Publish
+                    </button>
+                  <% } %>
+                </form>
 
-              <!-- Delete -->
-              <form
-                method="POST"
-                action="/admin/blogs/<%= blog._id %>/delete"
-                onsubmit="return confirm('Delete this blog?')"
-              >
-                <button class="btn btn-sm btn-outline-danger">
-                  Delete
+                <!-- Feature -->
+                <form
+                  method="POST"
+                  action="/admin/blogs/<%= blog._id %>/toggle-featured"
+                >
+                  <button class="btn btn-sm btn-outline-info w-100">
+                    <%= blog.featured ? "Unfeature" : "Feature" %>
+                  </button>
+                </form>
+
+                <!-- View -->
+                <button
+                  class="btn btn-sm btn-outline-info"
+                  data-bs-toggle="modal"
+                  data-bs-target="#view-<%= blog._id %>"
+                >
+                  View
                 </button>
-              </form>
+
+                <!-- Delete -->
+                <form
+                  method="POST"
+                  action="/admin/blogs/<%= blog._id %>/delete"
+                  onsubmit="return confirm('Delete this blog?')"
+                >
+                  <button class="btn btn-sm btn-outline-danger w-100">
+                    Delete
+                  </button>
+                </form>
+
+              </div>
             </td>
           </tr>
+
+          <!-- View Modal -->
+          <div
+            class="modal fade"
+            id="view-<%= blog._id %>"
+            tabindex="-1"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+              <div class="modal-content bg-dark text-light border border-secondary">
+
+                <!-- Header -->
+                <div class="modal-header border-secondary">
+                  <h5 class="modal-title">
+                    <%= blog.title %>
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn-close btn-close-white"
+                    data-bs-dismiss="modal"
+                  ></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+
+                  <!-- Meta Info -->
+                  <div class="mb-3 text-soft small">
+                    <span>Author: <strong><%= blog.author?.username || "—" %></strong></span>
+                    &nbsp;•&nbsp;
+                    <span>Category: <strong><%= blog.category?.name || "—" %></strong></span>
+                    &nbsp;•&nbsp;
+                    <span>Status:
+                      <strong class="<%= blog.status === 'published' ? 'text-success' : 'text-warning' %>">
+                        <%= blog.status %>
+                      </strong>
+                    </span>
+                  </div>
+
+                  <hr class="border-secondary">
+
+                  <!-- Blog Content -->
+                  <div class="blog-preview-content">
+                    <%- blog.content %>
+                  </div>
+
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer border-secondary">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                  >
+                    Close
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
         <% }) %>
       </tbody>
     </table>
@@ -131,3 +212,4 @@
     </ul>
   </nav>
 </div>
+

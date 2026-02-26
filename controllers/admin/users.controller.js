@@ -24,3 +24,29 @@ exports.toggleUserStatus = async (req, res) => {
 
   res.redirect("/admin/users");
 };
+
+/* SEARCH USERS */
+exports.listUsers = async (req, res) => {
+  const q = req.query.q;
+
+  let filter = {};
+
+  if (q) {
+    filter = {
+      $or: [
+        { fullname: { $regex: q, $options: "i" } },
+        { username: { $regex: q, $options: "i" } },
+        { email: { $regex: q, $options: "i" } },
+      ],
+    };
+  }
+
+  const users = await User.find(filter).sort({ createdAt: -1 });
+
+  res.render("admin/users", {
+    title: "Users",
+    activePage: "users",
+    users,
+    query: { q },
+  });
+};

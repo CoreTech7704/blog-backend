@@ -1,87 +1,79 @@
 <section class="mb-4">
   <h2 class="fw-semibold text-info mb-1">Categories Management</h2>
-  <p class="text-soft">
-    Create and manage blog categories
-  </p>
+  <p class="text-soft">Create and manage blog categories</p>
 </section>
 
-<div class="row g-3">
-  <!-- Add Category -->
-  <div class="col-lg-4">
-    <div class="admin-panel panel-surface">
-      <h5 class="panel-title">Add New Category</h5>
+<section class="container">
+  <div class="row justify-content-center g-4">
 
-      <form method="POST" action="/admin/categories">
-        <div class="mb-3">
-          <label class="form-label">Category Name</label>
-          <input
-            type="text"
-            class="form-control"
-            placeholder="e.g. Technology"
-            name="Category"
-          />
-        </div>
+    <!-- Add Category (Centered) -->
+    <div class="col-lg-4 col-md-6">
+      <div class="admin-panel panel-surface" style="height: fit-content;">
+        <h5 class="panel-title">Add New Category</h5>
 
-        <button type="button" class="btn btn-primary w-100">
-          Add Category
-        </button>
-      </form>
-    </div>
-  </div>
+        <form method="POST" action="/admin/categories">
+          <div class="mb-3">
+            <label class="form-label">Category Name</label>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="e.g. Technology"
+              name="name"
+              required
+            />
+          </div>
 
-  <!-- Categories List -->
-  <div class="col-lg-8">
-    <div class="admin-panel panel-surface">
-      <h5 class="panel-title">Existing Categories</h5>
-
-      <div class="table-responsive">
-        <table class="table table-dark table-hover align-middle text-light">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Slug</th>
-              <th>Blogs</th>
-              <th>Created</th>
-              <th class="text-end">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <% categories.forEach((cat, index) => { %>
-              <tr>
-                <td><%= index + 1 %></td>
-
-                <td><%= cat.name %></td>
-
-                <td class="text-soft">
-                  <%= cat.slug %>
-                </td>
-
-                <td>
-                  <%= blogCountMap[cat._id.toString()] || 0 %>
-                </td>
-
-                <td>
-                  <%= new Date(cat.createdAt).toLocaleDateString() %>
-                </td>
-
-                <td class="text-end">
-                  <form
-                    method="POST"
-                    action="/admin/categories/<%= cat._id %>/delete"
-                    onsubmit="return confirm('Delete this category?')"
-                  >
-                    <button class="btn btn-sm btn-outline-danger">
-                      Delete
-                    </button>
-                  </form>
-                </td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
+          <button type="submit" class="btn btn-primary w-100">
+            Add Category
+          </button>
+        </form>
       </div>
     </div>
+
+    <!-- Categories List -->
+    <div class="col-lg-8">
+      <div class="admin-panel panel-surface">
+        <h5 class="panel-title">Existing Categories</h5>
+
+        <div class="table-responsive">
+          <table class="table table-dark table-hover align-middle text-light">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Slug</th>
+                <th>Blogs</th>
+                <th>Created</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <% categories.forEach((cat, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td><%= cat.name %></td>
+                  <td class="text-soft"><%= cat.slug %></td>
+                  <td><%= blogCountMap[cat._id.toString()] || 0 %></td>
+                  <td><%= new Date(cat.createdAt).toLocaleDateString() %></td>
+                  <td class="text-end">
+                    <form
+                      method="POST"
+                      action="/admin/categories/<%= cat._id %>/delete"
+                      onsubmit="return confirm('Delete this category?')"
+                    >
+                      <button class="btn btn-sm btn-outline-danger">
+                        Delete
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
-</div>
+</section>

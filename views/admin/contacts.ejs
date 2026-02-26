@@ -7,18 +7,28 @@
 
 <div class="admin-panel panel-surface p-3">
   <!-- Filters -->
-  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-    <input
-      type="text"
-      class="form-control w-50"
-      placeholder="Search by name, email, or subject"
-    />
+  <div>
+    <form
+      method="GET"
+      action="/admin/contacts"
+      class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3"
+    >
+      <input
+        type="text"
+        name="q"
+        class="form-control w-50"
+        placeholder="Search by name, email, or subject"
+        value="<%= query?.q || '' %>"
+      />
 
-    <select class="form-select w-auto">
-      <option value="">All</option>
-      <option value="unread">Unread</option>
-      <option value="read">Read</option>
-    </select>
+      <select name="status" class="form-select w-auto">
+        <option value="">All</option>
+        <option value="unread" <%= query?.status === 'unread' ? 'selected' : '' %>>Unread</option>
+        <option value="read" <%= query?.status === 'read' ? 'selected' : '' %>>Read</option>
+      </select>
+
+      <button class="btn btn-outline-info">Filter</button>
+    </form>
   </div>
 
   <!-- Reports Table -->
@@ -57,38 +67,42 @@
               <%= new Date(c.createdAt).toLocaleDateString() %>
             </td>
 
-            <td class="text-end d-flex gap-1 justify-content-end">
-              <!-- View -->
-              <button
-                class="btn btn-sm btn-outline-info"
-                data-bs-toggle="modal"
-                data-bs-target="#view-<%= c._id %>"
-              >
-                View
-              </button>
+            <td class="text-end p-2">
+              <div class="action-grid-sm">
 
-              <!-- Mark Read -->
-              <% if (!c.isRead) { %>
+                <!-- View -->
+                <button
+                  class="btn btn-sm btn-outline-info w-100"
+                  data-bs-toggle="modal"
+                  data-bs-target="#view-<%= c._id %>"
+                >
+                  View
+                </button>
+
+                <!-- Mark Read -->
+                <% if (!c.isRead) { %>
+                  <form
+                    method="POST"
+                    action="/admin/contacts/<%= c._id %>/read"
+                  >
+                    <button class="btn btn-sm btn-outline-success w-100">
+                      Mark Read
+                    </button>
+                  </form>
+                <% } %>
+
+                <!-- Delete -->
                 <form
                   method="POST"
-                  action="/admin/contacts/<%= c._id %>/read"
+                  action="/admin/contacts/<%= c._id %>/delete"
+                  onsubmit="return confirm('Delete this message?')"
                 >
-                  <button class="btn btn-sm btn-outline-success">
-                    Mark Read
+                  <button class="btn btn-sm btn-outline-danger w-100">
+                    Delete
                   </button>
                 </form>
-              <% } %>
 
-              <!-- Delete -->
-              <form
-                method="POST"
-                action="/admin/contacts/<%= c._id %>/delete"
-                onsubmit="return confirm('Delete this message?')"
-              >
-                <button class="btn btn-sm btn-outline-danger">
-                  Delete
-                </button>
-              </form>
+              </div>
             </td>
           </tr>
 

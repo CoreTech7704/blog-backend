@@ -36,6 +36,13 @@ body {
   background-color: var(--bg-main);
 }
 
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(80px, 1fr));
+  gap: 0.4rem;
+  justify-items: stretch;
+}
+
 /* SIDEBAR NAV */
 .admin-sidebar .nav-link {
   display: flex;
@@ -166,6 +173,7 @@ textarea:focus {
   background-color: var(--bg-input);
   border-color: var(--primary);
   box-shadow: none;
+  color: var(--text-main);
 }
 
 /* ADMIN NOTES */
@@ -227,4 +235,29 @@ textarea:focus {
 
 .admin-panel .text-muted {
   color: #8b98a5 !important;
+}
+
+/* Blog view */
+.blog-preview-content {
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+
+.blog-preview-content img {
+  max-width: 100%;
+  border-radius: 6px;
+  margin: 0.5rem 0;
+}
+
+.blog-preview-content h1,
+.blog-preview-content h2,
+.blog-preview-content h3 {
+  margin-top: 1rem;
+}
+
+.action-grid-sm {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.35rem;
+  justify-items: stretch;
 }
