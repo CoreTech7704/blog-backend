@@ -147,20 +147,23 @@ v2.0.0 — Stable (Beta Release)
 Create a `.env` file in the project root:
 
 ```env
-PORT=8000
+NODE_ENV=production/development
+
+PORT=8000 (only when using on localhost)
+
 CLIENT_URL=http://localhost:5173
 SERVER_URL=http://localhost:8000
 
 MONGO_URL=your_mongodb_atlas_url
 
-JWT_SECRET=your_jwt_secret
-JWT_REFRESH_SECRET=your_refresh_secret
-ADMIN_JWT_SECRET=your_admin_jwt_secret
-
-CSRF_SECRET=your_csrf_secret_key
-
 UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
 UPSTASH_REDIS_REST_URL=your_upstash_redis_url
+
+ADMIN_JWT_ACCESS_SECRET=your_admin_jwt_access_secret
+ADMIN_JWT_REFRESH_SECRET=your_admin_jwt_refresh_secret
+
+JWT_ACCESS_SECRET=your_jwt_secret
+JWT_REFRESH_SECRET=your_refresh_secret
 ```
 
 ---

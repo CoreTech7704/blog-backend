@@ -1,6 +1,6 @@
 {
   "name": "blog-app",
-  "version": "1.5.0",
+  "version": "2.0.0",
   "description": "An open-source, developer-focused blogging platform built with Node.js, Express, MongoDB, and EJS.",
   "license": "ISC",
   "author": "CoreTech7704(Sarvam Patel)",
@@ -8,8 +8,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
-    "seed:cleardatabase": "node scripts/cleardatabase.js"
+    "dev": "nodemon index.js"
   },
   "dependencies": {
     "@upstash/redis": "^1.36.2",
