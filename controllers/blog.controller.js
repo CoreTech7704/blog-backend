@@ -3,8 +3,32 @@ const Comment = require("../models/Comment");
 const Category = require("../models/Category");
 const mongoose = require("mongoose");
 const { getCache, setCache, delCache } = require("../utils/cache");
-const deleteFile = require("../utils/deleteFile");
+const cloudinary = require("../utils/cloudinary");
+const deleteCloudinary = require("../utils/deleteCloudinary");
 const updateAuthorStatus = require("../utils/updateAuthorStatus");
+
+// Helper to clear relevant caches after blog creation/update
+async function postCreateCleanup(blog, userId) {
+  // clear global + user caches
+  await delCache([
+    "home:data",
+    "blogs:latest",
+    `user:dashboard:${userId}`,
+  ]);
+
+  // clear category cache
+  if (blog.category) {
+    const cat = await Category.findById(blog.category).lean();
+    if (cat) {
+      await delCache(`category:blogs:${cat.slug}`);
+    }
+  }
+
+  // update author status if published
+  if (blog.status === "published") {
+    await updateAuthorStatus(userId);
+  }
+}
 
 /* ================= GET MY BLOGS ================= */
 exports.getMyBlogs = async (req, res) => {
@@ -60,16 +84,14 @@ exports.createBlog = async (req, res) => {
     const { title, content, excerpt, category, status } = req.body;
 
     if (!title || !content) {
-      return res
-        .status(400)
-        .json({ message: "Title and content are required" });
+      return res.status(400).json({ message: "Title and content are required" });
     }
 
     let parsedTags = ["General"];
     if (req.body.tags) {
       try {
         parsedTags = JSON.parse(req.body.tags);
-        if (!Array.isArray(parsedTags) || parsedTags.length === 0) {
+        if (!Array.isArray(parsedTags) || !parsedTags.length) {
           parsedTags = ["General"];
         }
       } catch {
@@ -77,7 +99,7 @@ exports.createBlog = async (req, res) => {
       }
     }
 
-    const blog = await Blog.create({
+    const blog = new Blog({
       title,
       content,
       excerpt,
@@ -85,24 +107,35 @@ exports.createBlog = async (req, res) => {
       category,
       status: status === "published" ? "published" : "draft",
       author: req.user.id,
-      coverImage: req.file ? `/uploads/covers/${req.file.filename}` : null,
     });
 
-    await delCache([
-      "home:data",
-      "blogs:latest",
-      `user:dashboard:${req.user.id}`,
-    ]);
+    // 🔥 CLOUDINARY COVER UPLOAD
+    if (req.file) {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: `voidwork/blog-covers/${blog._id}`,
+        },
+        async (err, result) => {
+          if (err) throw err;
 
-    if (blog.category) {
-      const cat = await Category.findById(blog.category).lean();
-      if (cat) await delCache(`category:blogs:${cat.slug}`);
+          blog.cover = {
+            url: result.secure_url,
+            publicId: result.public_id,
+          };
+
+          await blog.save();
+          await postCreateCleanup(blog, req.user.id);
+
+          res.status(201).json(blog);
+        }
+      );
+
+      uploadStream.end(req.file.buffer);
+      return;
     }
 
-    if (blog.status === "published") {
-      await updateAuthorStatus(req.user.id);
-    }
-
+    await blog.save();
+    await postCreateCleanup(blog, req.user.id);
     res.status(201).json(blog);
   } catch (err) {
     console.error("CREATE BLOG ERROR:", err);
@@ -186,7 +219,9 @@ exports.deleteBlog = async (req, res) => {
     const categoryId = blog.category;
 
     await Comment.deleteMany({ blog: blog._id });
-    deleteFile(blog.coverImage);
+    if (blog.cover?.publicId) {
+      await deleteCloudinary(blog.cover.publicId);
+    }
     await blog.deleteOne();
 
     await delCache([
@@ -260,6 +295,10 @@ exports.getBlogForEdit = async (req, res) => {
 /* ================= UPDATE COVER ================= */
 exports.updateCover = async (req, res) => {
   try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No cover image provided" });
+    }
+
     const blog = await Blog.findById(req.params.id);
     if (!blog) return res.status(404).json({ message: "Blog not found" });
 
@@ -267,14 +306,31 @@ exports.updateCover = async (req, res) => {
       return res.status(403).json({ message: "Not allowed" });
     }
 
-    deleteFile(blog.coverImage);
+    // delete old cover
+    if (blog.cover?.publicId) {
+      await deleteCloudinary(blog.cover.publicId);
+    }
 
-    blog.coverImage = `/uploads/covers/${req.file.filename}`;
-    await blog.save();
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: `voidwork/blog-covers/${blog._id}`,
+      },
+      async (err, result) => {
+        if (err) throw err;
 
-    await delCache(`blog:slug:${blog.slug}`);
+        blog.cover = {
+          url: result.secure_url,
+          publicId: result.public_id,
+        };
 
-    res.json({ coverImage: blog.coverImage });
+        await blog.save();
+        await delCache(`blog:slug:${blog.slug}`);
+
+        res.json({ cover: blog.cover });
+      }
+    );
+
+    uploadStream.end(req.file.buffer);
   } catch (err) {
     console.error("UPDATE COVER ERROR:", err);
     res.status(500).json({ message: "Failed to update cover" });

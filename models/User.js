@@ -34,8 +34,14 @@ const userSchema = new Schema(
     },
 
     avatar: {
-      type: String,
-      default: "/images/default.jpg",
+      url: {
+        type: String,
+        default: "",
+      },
+      publicId: {
+        type: String,
+        default: "",
+      },
     },
 
     bio: {

@@ -27,9 +27,15 @@ const blogSchema = new Schema(
       required: true,
     },
 
-    coverImage: {
-      type: String,
-      default: null,
+    cover: {
+      url: {
+        type: String,
+        default: "",
+      },
+      publicId: {
+        type: String,
+        default: "",
+      },
     },
 
     author: {
@@ -68,7 +74,7 @@ const blogSchema = new Schema(
       default: 0,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Text search index

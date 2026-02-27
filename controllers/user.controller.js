@@ -1,8 +1,9 @@
 const mongoose = require("mongoose");
 const Blog = require("../models/blog");
 const User = require("../models/User");
+const cloudinary = require("../utils/cloudinary");
+const deleteCloudinary = require("../utils/deleteCloudinary");
 const { getCache, setCache, delCache } = require("../utils/cache");
-const deleteFile = require("../utils/deleteFile");
 
 /* ================= GET PROFILE ================= */
 exports.getProfile = async (req, res) => {
@@ -135,10 +136,10 @@ exports.dashboard = async (req, res) => {
 };
 
 /* ================= UPDATE AVATAR ================= */
-exports.updateAvatar = async (req, res) => {
+exports.updateAvatar = async (req, res, next) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ message: "No image uploaded" });
+      return res.status(400).json({ message: "No avatar image provided" });
     }
 
     const user = await User.findById(req.user.id);
@@ -146,19 +147,38 @@ exports.updateAvatar = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    deleteFile(user.avatar);
+    // delete old avatar if exists
+    if (user.avatar?.publicId) {
+      await deleteCloudinary(user.avatar.publicId);
+    }
 
-    user.avatar = `/uploads/avatars/${req.file.filename}`;
-    await user.save();
+    // upload new avatar
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: `voidwork/avatars/${user._id}`,
+        resource_type: "image",
+      },
+      async (error, result) => {
+        if (error) return next(error);
 
-    await delCache(`user:dashboard:${req.user.id}`);
+        user.avatar = {
+          url: result.secure_url,
+          publicId: result.public_id,
+        };
 
-    res.json({
-      message: "Avatar updated",
-      avatar: user.avatar,
-    });
+        await user.save();
+
+        await delCache(`user:dashboard:${req.user.id}`);
+        
+        res.json({
+          message: "Avatar updated successfully",
+          avatar: user.avatar,
+        });
+      }
+    );
+
+    uploadStream.end(req.file.buffer);
   } catch (err) {
-    console.error("AVATAR UPLOAD ERROR:", err);
-    res.status(500).json({ message: "Avatar upload failed" });
+    next(err);
   }
 };
