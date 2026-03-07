@@ -1,4 +1,5 @@
 const Blog = require("../models/blog");
+const Category = require("../models/Category");
 const redis = require("../config/redis");
 
 exports.searchBlogs = async (req, res) => {
@@ -20,41 +21,70 @@ exports.searchBlogs = async (req, res) => {
   const cacheKey = `search:${q.toLowerCase()}:${page}:${limit}`;
 
   try {
-    /* ================= CACHE HIT ================= */
+    /* ================= CACHE ================= */
     const cached = await redis.get(cacheKey);
     if (cached) {
-      return res.json(cached); // Upstash auto parses JSON
+      return res.json(cached);
     }
 
-    /* ================= DB QUERY ================= */
-    const query = {
-      status: "published",
-      $text: { $search: q },
-    };
+    /* ================= FIND CATEGORY MATCH ================= */
+    const matchingCategories = await Category.find({
+      name: { $regex: q, $options: "i" },
+    }).select("_id");
+
+    const categoryIds = matchingCategories.map((c) => c._id);
 
     const skip = (page - 1) * limit;
 
-    const [results, total] = await Promise.all([
-      Blog.find(query, { score: { $meta: "textScore" } })
+    /* ================= TEXT SEARCH ================= */
+    const textResults = await Blog.find(
+      { status: "published", $text: { $search: q } },
+      { score: { $meta: "textScore" } }
+    )
+      .select("title slug excerpt tags readingTime createdAt")
+      .populate("author", "fullname")
+      .populate("category", "name")
+      .lean();
+
+    /* ================= CATEGORY SEARCH ================= */
+    let categoryResults = [];
+
+    if (categoryIds.length > 0) {
+      categoryResults = await Blog.find({
+        status: "published",
+        category: { $in: categoryIds },
+      })
         .select("title slug excerpt tags readingTime createdAt")
-        .sort({ score: { $meta: "textScore" }, createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
         .populate("author", "fullname")
         .populate("category", "name")
-        .lean(),
+        .lean();
+    }
 
-      Blog.countDocuments(query),
-    ]);
+    /* ================= MERGE RESULTS ================= */
+
+    const merged = [...textResults, ...categoryResults];
+
+    const unique = Array.from(
+      new Map(merged.map((blog) => [blog._id.toString(), blog])).values()
+    );
+
+    /* ================= SORT ================= */
+
+    unique.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const total = unique.length;
+
+    const paginated = unique.slice(skip, skip + limit);
 
     const response = {
-      results,
+      results: paginated,
       total,
       page,
       pages: Math.ceil(total / limit),
     };
 
-    /* ================= CACHE SET ================= */
+    /* ================= CACHE ================= */
+
     await redis.set(cacheKey, response, { ex: 300 });
 
     res.json(response);
