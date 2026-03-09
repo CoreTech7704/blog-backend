@@ -12,4 +12,7 @@ router.put("/me/avatar", auth, upload.single("avatar"), user.updateAvatar);
 // Dashboard
 router.get("/dashboard", auth, user.dashboard);
 
+// User profile public
+router.get("/:username", user.getUserProfile);
+
 module.exports = router;

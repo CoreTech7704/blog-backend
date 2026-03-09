@@ -5,6 +5,46 @@ const cloudinary = require("../utils/cloudinary");
 const deleteCloudinary = require("../utils/deleteCloudinary");
 const { getCache, setCache, delCache } = require("../utils/cache");
 
+/* ================= GET USER PROFILE (public) ================= */
+exports.getUserProfile = async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    const user = await User.findOne({ username })
+      .select("fullname username avatar bio isAuthor isActive createdAt")
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const blogs = await Blog.find({
+      author: user._id,
+      status: "published",
+    })
+      .select("title slug excerpt readingTime createdAt")
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .populate("category", "name")
+      .lean();
+
+    const blogCount = await Blog.countDocuments({
+      author: user._id,
+      status: "published",
+    });
+
+    res.json({
+      user,
+      blogs,
+      blogCount,
+    });
+
+  } catch (err) {
+    console.error("USER PROFILE ERROR:", err);
+    res.status(500).json({ message: "Failed to load profile" });
+  }
+};
+
 /* ================= GET PROFILE ================= */
 exports.getProfile = async (req, res) => {
   try {

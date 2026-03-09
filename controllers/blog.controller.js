@@ -61,7 +61,7 @@ exports.getBlogBySlug = async (req, res) => {
       slug,
       status: "published",
     })
-      .populate("author", "fullname avatar")
+      .populate("author", "fullname username avatar")
       .lean();
 
     if (!blog) {
@@ -255,7 +255,8 @@ exports.getLatestBlogs = async (req, res) => {
     }
 
     const blogs = await Blog.find({ status: "published" })
-      .populate("author", "fullname avatar")
+      .populate("author", "fullname username avatar")
+      .populate("category", "name slug")
       .sort({ createdAt: -1 })
       .limit(10)
       .lean();

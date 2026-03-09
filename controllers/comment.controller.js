@@ -26,7 +26,7 @@ exports.getComments = async (req, res) => {
       blog: blogId,
       isApproved: true,
     })
-      .populate("user", "fullname avatar")
+      .populate("user", "fullname username avatar")
       .sort({ createdAt: 1 })
       .lean();
 
@@ -101,7 +101,7 @@ exports.addComment = async (req, res) => {
 
     // populate user before returning
     const populatedComment = await Comment.findById(comment._id)
-      .populate("user", "fullname avatar")
+      .populate("user", "fullname username avatar")
       .lean();
 
     await delCache(`blog:comments:${blogId}`);
