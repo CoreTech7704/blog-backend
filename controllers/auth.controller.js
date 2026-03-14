@@ -2,6 +2,8 @@ const User = require("../models/User");
 const Token = require("../models/Token");
 const Blog = require("../models/blog");
 const Comment = require("../models/Comment");
+const crypto = require("crypto");
+const { sendEmail } = require("../utils/mailer");
 const {
   signAccessToken,
   signRefreshToken,
@@ -254,5 +256,99 @@ exports.deleteAccount = async (req, res) => {
   } catch (err) {
     console.error("DELETE ACCOUNT ERROR:", err);
     res.status(500).json({ message: "Failed to delete account" });
+  }
+};
+
+/* ================= FORGOT PASSWORD ================= */
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.json({
+        message: "If account exists, reset email sent",
+      });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    const hashedToken = Token.hashToken(resetToken);
+
+    await Token.deleteMany({ user: user._id });
+
+    await Token.create({
+      user: user._id,
+      tokenHash: hashedToken,
+      expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+    });
+
+    console.log("RESET TOKEN:", resetToken);
+
+    const resetURL = `${process.env.CLIENT_URL}/api/auth/reset-password/${resetToken}`;
+
+    await sendEmail(
+      user.email,
+      "Reset your password",
+      `
+      <h2>Password Reset</h2>
+      <p>Click below to reset password</p>
+      <a href="${resetURL}">Reset Password</a>
+      <p>This link expires in 15 minutes.</p>
+      `,
+    );
+
+    res.json({ message: "Reset email sent" });
+  } catch (err) {
+    console.error("FORGOT PASSWORD ERROR:", err);
+    res.status(500).json({ message: "Failed to send reset email" });
+  }
+};
+
+/* ================= RESET PASSWORD ================= */
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters",
+      });
+    }
+
+    const tokenHash = Token.hashToken(token);
+
+    const storedToken = await Token.findOne({
+      tokenHash,
+      expiresAt: { $gt: new Date() },
+    });
+
+    if (!storedToken) {
+      return res.status(400).json({
+        message: "Invalid or expired token",
+      });
+    }
+
+    const user = await User.findById(storedToken.user).select("+password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    user.password = password;
+    await user.save();
+
+    await storedToken.deleteOne();
+    await Token.deleteMany({ user: user._id });
+
+    res.json({
+      message: "Password reset successful",
+    });
+  } catch (err) {
+    console.error("RESET PASSWORD ERROR:", err);
+    res.status(500).json({ message: "Password reset failed" });
   }
 };
