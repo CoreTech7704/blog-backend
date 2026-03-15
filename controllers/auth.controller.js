@@ -286,17 +286,79 @@ exports.forgotPassword = async (req, res) => {
 
     console.log("RESET TOKEN:", resetToken);
 
-    const resetURL = `${process.env.CLIENT_URL}/api/auth/reset-password/${resetToken}`;
+    const resetURL = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
     await sendEmail(
       user.email,
-      "Reset your password",
+      "Reset your Void Work password",
       `
-      <h2>Password Reset</h2>
-      <p>Click below to reset password</p>
-      <a href="${resetURL}">Reset Password</a>
-      <p>This link expires in 15 minutes.</p>
-      `,
+  <div style="font-family: Arial, sans-serif; background:#f4f4f7;">
+    <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background:#ffffff; border-radius:8px; overflow:hidden;">
+      
+      <tr>
+        <td style="padding:30px; text-align:center; background:#0f172a; color:#ffffff;">
+          <h2 style="margin:0;">Void Work</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding:30px;">
+          <p style="font-size:16px; color:#333;">Hi ${user.fullname || "there"},</p>
+
+          <p style="font-size:16px; color:#333;">
+            You recently requested to reset your password for your <strong>Void Work</strong> account.
+            Click the button below to choose a new one.
+          </p>
+
+          <div style="text-align:center; margin:30px 0;">
+            <a href="${resetURL}"
+              style="
+                background:#06b6d4;
+                color:#ffffff;
+                padding:12px 24px;
+                text-decoration:none;
+                border-radius:6px;
+                font-weight:bold;
+                display:inline-block;
+              ">
+              Reset Password
+            </a>
+          </div>
+
+          <p style="font-size:14px; color:#555;">
+            For your security, this link will expire in <strong>15 minutes</strong>.
+          </p>
+
+          <p style="font-size:12px;color:#666;margin-top:30px;">
+          This password reset request was received from our website.
+          If you did not make this request, your account is still secure.
+          </p>
+
+          <p style="font-size:14px;color:#555;">
+            If the button doesn't work, copy and paste this link into your browser:
+          </p>
+
+          <p style="word-break:break-all;">
+            ${resetURL}
+          </p>
+
+          <p style="font-size:14px; color:#333; margin-top:30px;">
+            Cheers,<br/>
+            <strong>Sarvam Patel</strong><br/>
+            Void Work
+          </p>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding:20px; text-align:center; font-size:12px; color:#999; background:#f4f4f7;">
+          © ${new Date().getFullYear()} Void Work. All rights reserved.
+        </td>
+      </tr>
+
+    </table>
+  </div>
+  `,
     );
 
     res.json({ message: "Reset email sent" });
