@@ -71,6 +71,66 @@ exports.signup = async (req, res) => {
       isEmailVerified: true,
     });
 
+    try {
+      await sendEmail(
+        user.email,
+        "Welcome to Void Work 🚀",
+        `
+      <div style="font-family: Arial, sans-serif; background:#f4f4f7; padding:40px 0;">
+        <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;">
+
+          <tr>
+            <td style="padding:30px;text-align:center;background:#0f172a;color:#ffffff;">
+              <h2 style="margin:0;">Void Work</h2>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:30px;">
+              <p style="font-size:16px;color:#333;">Hi ${user.fullname},</p>
+
+              <p style="font-size:16px;color:#333;">
+                Welcome to <strong>Void Work</strong> 🎉
+              </p>
+
+              <p style="font-size:15px;color:#555;">
+                Your account has been successfully created.
+                You can now explore blogs, share your ideas, and connect with others.
+              </p>
+
+              <div style="text-align:center;margin:30px 0;">
+                <a href="${process.env.FRONTEND_URL}"
+                  style="background:#06b6d4;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;">
+                  Visit Void Work
+                </a>
+              </div>
+
+              <p style="font-size:14px;color:#555;">
+                If you ever have questions or feedback, feel free to reach out.
+              </p>
+
+              <p style="margin-top:30px;">
+                Cheers,<br/>
+                <strong>Sarvam Patel</strong><br/>
+                Void Work
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:20px;text-align:center;font-size:12px;color:#999;background:#f4f4f7;">
+              © ${new Date().getFullYear()} Void Work
+            </td>
+          </tr>
+
+        </table>
+      </div>
+    `,
+      );
+    } catch (mailErr) {
+      console.error("WELCOME EMAIL ERROR:", mailErr);
+    }
+
     const accessToken = signAccessToken({
       id: user._id,
       role: user.role,
@@ -219,11 +279,13 @@ exports.changePassword = async (req, res) => {
     }
 
     const user = await User.findById(req.user.id).select("+password");
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     const isMatch = await user.comparePassword(currentPassword);
+
     if (!isMatch) {
       return res.status(401).json({ message: "Incorrect current password" });
     }
@@ -232,6 +294,66 @@ exports.changePassword = async (req, res) => {
     await user.save();
 
     await Token.deleteMany({ user: user._id });
+
+    // Send password change email
+    try {
+      await sendEmail(
+        user.email,
+        "Your Void Work password was changed",
+        `
+        <div style="font-family: Arial, sans-serif; background:#f4f4f7; padding:40px 0;">
+          <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;">
+            
+            <tr>
+              <td style="padding:30px;text-align:center;background:#0f172a;color:#ffffff;">
+                <h2 style="margin:0;">Void Work</h2>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:30px;">
+                <p style="font-size:16px;color:#333;">Hi ${user.fullname},</p>
+
+                <p style="font-size:16px;color:#333;">
+                  Your password was successfully changed.
+                </p>
+
+                <p style="font-size:14px;color:#555;">
+                  If you made this change, no further action is required.
+                </p>
+
+                <p style="font-size:14px;color:#555;">
+                  If you did <strong>not</strong> change your password,
+                  please reset it immediately using the link below.
+                </p>
+
+                <div style="text-align:center;margin:30px 0;">
+                  <a href="${process.env.FRONTEND_URL}/forgot-password"
+                     style="background:#ef4444;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;">
+                    Secure Your Account
+                  </a>
+                </div>
+
+                <p style="margin-top:30px;">
+                  Cheers,<br/>
+                  <strong>Void Work Team</strong>
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:20px;text-align:center;font-size:12px;color:#999;background:#f4f4f7;">
+                © ${new Date().getFullYear()} Void Work
+              </td>
+            </tr>
+
+          </table>
+        </div>
+        `,
+      );
+    } catch (mailErr) {
+      console.error("PASSWORD CHANGE EMAIL ERROR:", mailErr);
+    }
 
     res.json({ message: "Password updated successfully" });
   } catch (err) {
@@ -244,6 +366,61 @@ exports.changePassword = async (req, res) => {
 exports.deleteAccount = async (req, res) => {
   try {
     const userId = req.user.id;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Send account deletion email
+    try {
+      await sendEmail(
+        user.email,
+        "Your Void Work account has been deleted",
+        `
+        <div style="font-family: Arial, sans-serif; background:#f4f4f7; padding:40px 0;">
+          <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;">
+            
+            <tr>
+              <td style="padding:30px;text-align:center;background:#0f172a;color:#ffffff;">
+                <h2 style="margin:0;">Void Work</h2>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:30px;">
+                <p style="font-size:16px;color:#333;">Hi ${user.fullname},</p>
+
+                <p style="font-size:16px;color:#333;">
+                  Your <strong>Void Work</strong> account has been successfully deleted.
+                </p>
+
+                <p style="font-size:14px;color:#555;">
+                  We're sorry to see you go. If this action was not performed by you,
+                  please contact support immediately.
+                </p>
+
+                <p style="margin-top:30px;">
+                  Cheers,<br/>
+                  <strong>Void Work Team</strong>
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:20px;text-align:center;font-size:12px;color:#999;background:#f4f4f7;">
+                © ${new Date().getFullYear()} Void Work
+              </td>
+            </tr>
+
+          </table>
+        </div>
+        `,
+      );
+    } catch (mailErr) {
+      console.error("DELETE EMAIL ERROR:", mailErr);
+    }
 
     await Token.deleteMany({ user: userId });
     await Blog.deleteMany({ author: userId });
