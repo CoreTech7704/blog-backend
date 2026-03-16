@@ -38,7 +38,6 @@ exports.getUserProfile = async (req, res) => {
       blogs,
       blogCount,
     });
-
   } catch (err) {
     console.error("USER PROFILE ERROR:", err);
     res.status(500).json({ message: "Failed to load profile" });
@@ -48,9 +47,9 @@ exports.getUserProfile = async (req, res) => {
 /* ================= GET PROFILE ================= */
 exports.getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select(
-      "fullname username email avatar bio role createdAt"
-    );
+    const user = await User.findById(req.user.id)
+      .select("fullname username email avatar bio role createdAt")
+      .lean();
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -149,9 +148,7 @@ exports.dashboard = async (req, res) => {
         .limit(5)
         .lean(),
 
-      User.findById(userId)
-        .select("fullname username avatar")
-        .lean(),
+      User.findById(userId).select("fullname username avatar").lean(),
     ]);
 
     const stats = statsAgg?.[0] || {};
@@ -187,8 +184,8 @@ exports.updateAvatar = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // delete old avatar if exists
-    if (user.avatar?.publicId) {
+    // delete old avatar only if it is not the default avatar
+    if (user.avatar?.publicId && user.avatar.publicId !== "default-avatar") {
       await deleteCloudinary(user.avatar.publicId);
     }
 
@@ -209,12 +206,12 @@ exports.updateAvatar = async (req, res, next) => {
         await user.save();
 
         await delCache(`user:dashboard:${req.user.id}`);
-        
+
         res.json({
           message: "Avatar updated successfully",
           avatar: user.avatar,
         });
-      }
+      },
     );
 
     uploadStream.end(req.file.buffer);

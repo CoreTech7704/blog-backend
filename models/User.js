@@ -36,11 +36,11 @@ const userSchema = new Schema(
     avatar: {
       url: {
         type: String,
-        default: "",
+        default: "https://res.cloudinary.com/daax8dehh/image/upload/v1773673391/default-avatar_qwz0c2.webp",
       },
       publicId: {
         type: String,
-        default: "",
+        default: "default-avatar",
       },
     },
 

@@ -30,11 +30,11 @@ const blogSchema = new Schema(
     cover: {
       url: {
         type: String,
-        default: "",
+        default: "https://res.cloudinary.com/daax8dehh/image/upload/v1773674991/default-blog-cover_zg2sni.webp",
       },
       publicId: {
         type: String,
-        default: "",
+        default: "default-blog-cover",
       },
     },
 

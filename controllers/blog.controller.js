@@ -10,11 +10,7 @@ const updateAuthorStatus = require("../utils/updateAuthorStatus");
 // Helper to clear relevant caches after blog creation/update
 async function postCreateCleanup(blog, userId) {
   // clear global + user caches
-  await delCache([
-    "home:data",
-    "blogs:latest",
-    `user:dashboard:${userId}`,
-  ]);
+  await delCache(["home:data", "blogs:latest", `user:dashboard:${userId}`]);
 
   // clear category cache
   if (blog.category) {
@@ -84,7 +80,9 @@ exports.createBlog = async (req, res) => {
     const { title, content, excerpt, category, status } = req.body;
 
     if (!title || !content) {
-      return res.status(400).json({ message: "Title and content are required" });
+      return res
+        .status(400)
+        .json({ message: "Title and content are required" });
     }
 
     let parsedTags = ["General"];
@@ -127,7 +125,7 @@ exports.createBlog = async (req, res) => {
           await postCreateCleanup(blog, req.user.id);
 
           res.status(201).json(blog);
-        }
+        },
       );
 
       uploadStream.end(req.file.buffer);
@@ -165,7 +163,7 @@ exports.updateBlog = async (req, res) => {
     // Handle tags safely
     if (req.body.tags) {
       if (Array.isArray(req.body.tags) && req.body.tags.length > 0) {
-        blog.tags = req.body.tags.map(t => t.trim()).filter(Boolean);
+        blog.tags = req.body.tags.map((t) => t.trim()).filter(Boolean);
       } else {
         blog.tags = ["General"];
       }
@@ -255,7 +253,7 @@ exports.getLatestBlogs = async (req, res) => {
     }
 
     const blogs = await Blog.find({ status: "published" })
-      .populate("author", "fullname username avatar")
+      .populate("author", "fullname username avatar cover")
       .populate("category", "name slug")
       .sort({ createdAt: -1 })
       .limit(10)
@@ -308,7 +306,9 @@ exports.updateCover = async (req, res) => {
     }
 
     // delete old cover
-    if (blog.cover?.publicId) {
+    const DEFAULT_COVER_ID = "default-blog-cover";
+
+    if (blog.cover?.publicId && blog.cover.publicId !== DEFAULT_COVER_ID) {
       await deleteCloudinary(blog.cover.publicId);
     }
 
@@ -317,7 +317,10 @@ exports.updateCover = async (req, res) => {
         folder: `voidwork/blog-covers/${blog._id}`,
       },
       async (err, result) => {
-        if (err) throw err;
+        if (err) {
+          console.error("CLOUDINARY COVER ERROR:", err);
+          return res.status(500).json({ message: "Cover upload failed" });
+        }
 
         blog.cover = {
           url: result.secure_url,
@@ -328,7 +331,7 @@ exports.updateCover = async (req, res) => {
         await delCache(`blog:slug:${blog.slug}`);
 
         res.json({ cover: blog.cover });
-      }
+      },
     );
 
     uploadStream.end(req.file.buffer);
