@@ -66,10 +66,9 @@ const userSchema = new Schema(
       default: true,
     },
 
-    // unused (safe)
     isEmailVerified: {
       type: Boolean,
-      default: true,
+      default: false,
     },
 
     passwordResetToken: String,

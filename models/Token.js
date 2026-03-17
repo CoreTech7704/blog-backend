@@ -13,6 +13,11 @@ const tokenSchema = new Schema(
       type: String,
       required: true,
     },
+    type: {
+      type: String,
+      enum: ["refresh", "reset", "verify"],
+      required: true,
+    },
     expiresAt: {
       type: Date,
       required: true,

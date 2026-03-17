@@ -54,29 +54,198 @@ exports.signup = async (req, res) => {
       });
     }
 
-    const exists = await User.findOne({ email });
+    let exists = await User.findOne({ email });
     if (exists) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const base = email.split("@")[0].replace(/[^a-zA-Z0-9]/g, "");
-    const suffix = Math.floor(1000 + Math.random() * 9000);
-    const username = `${base}_${suffix}`;
+    // Generate unique username
+    let username;
+    do {
+      const base = email.split("@")[0].replace(/[^a-zA-Z0-9]/g, "");
+      const suffix = Math.floor(1000 + Math.random() * 9000);
+      username = `${base}_${suffix}`;
+      exists = await User.findOne({ username });
+    } while (exists);
 
     const user = await User.create({
       fullname,
       username,
       email,
       password,
-      isEmailVerified: true,
+      isEmailVerified: false,
+      avatar: {
+        url: process.env.DEFAULT_AVATAR_URL,
+        publicId: "default-avatar",
+      },
     });
 
-    try {
-      await sendEmail(
-        user.email,
-        "Welcome to Void Work 🚀",
+    // Generate verification token
+    const verifyToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = Token.hashToken(verifyToken);
+
+    // Clean old verify tokens
+    await Token.deleteMany({ user: user._id, type: "verify" });
+
+    // Store token
+    await Token.create({
+      user: user._id,
+      tokenHash: hashedToken,
+      type: "verify",
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+
+    const verifyURL = `${process.env.CLIENT_URL}/verify-email/${verifyToken}`;
+
+    // Send email (non-blocking)
+    await sendEmail(
+      user.email,
+        "Verify your Void Work email",
         `
-      <div style="font-family: Arial, sans-serif; background:#f4f4f7; padding:40px 0;">
+      <div style="font-family: Arial, sans-serif; background:#f4f4f7;">
+        <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 5px 20px rgba(0,0,0,0.08);">
+
+          <!-- HEADER -->
+          <tr>
+            <td style="padding:25px;text-align:center;background:#0f172a;color:#ffffff;">
+              <h2 style="margin:0;letter-spacing:1px;">Void Work</h2>
+            </td>
+          </tr>
+
+          <!-- BODY -->
+          <tr>
+            <td style="padding:35px;">
+              <p style="font-size:16px;color:#333;">Hi ${user.fullname || "there"},</p>
+
+              <p style="font-size:16px;color:#333;">
+                Welcome to <strong>Void Work</strong> 🚀
+              </p>
+
+              <p style="font-size:15px;color:#555;">
+                Please confirm your email address to activate your account and start exploring blogs, sharing ideas, and learning better.
+              </p>
+
+              <!-- BUTTON -->
+              <div style="text-align:center;margin:35px 0;">
+                <a href="${verifyURL}"
+                  style="
+                    background:linear-gradient(90deg,#06b6d4,#8b5cf6);
+                    color:#ffffff;
+                    padding:14px 28px;
+                    text-decoration:none;
+                    border-radius:8px;
+                    font-weight:bold;
+                    display:inline-block;
+                    font-size:15px;
+                  ">
+                  Verify Email
+                </a>
+              </div>
+
+              <p style="font-size:13px;color:#777;">
+                If the button doesn't work, copy and paste this link:
+                </p>
+                <p style="word-break:break-all;">
+                ${verifyURL}
+              </p>
+
+              <p style="font-size:14px;color:#555;">
+                This link will expire in <strong>24 hours</strong>.
+              </p>
+
+              <p style="font-size:14px;color:#555;">
+                If you did not create this account, you can safely ignore this email.
+              </p>
+
+              <p style="margin-top:30px;font-size:14px;color:#333;">
+                Cheers,<br/>
+                <strong>Void Work Team</strong>
+              </p>
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="padding:20px;text-align:center;font-size:12px;color:#999;background:#f4f4f7;">
+              © ${new Date().getFullYear()} Void Work. All rights reserved.
+            </td>
+          </tr>
+
+        </table>
+      </div>
+    `,
+    ).catch((err) => console.error("EMAIL VERIFICATION ERROR:", err));
+
+    // Auth tokens
+    const accessToken = signAccessToken({
+      id: user._id,
+      role: user.role,
+    });
+
+    const refreshToken = signRefreshToken({ id: user._id });
+
+    await Token.create({
+      user: user._id,
+      tokenHash: Token.hashToken(refreshToken),
+      type: "refresh",
+      expiresAt: new Date(Date.now() + COOKIE_OPTIONS.maxAge),
+    });
+
+    res.cookie("refreshToken", refreshToken, COOKIE_OPTIONS);
+
+    res.status(201).json({
+      message: "Signup successful. Please verify your email.",
+      accessToken,
+      user: {
+        id: user._id,
+        fullname: user.fullname,
+        email: user.email,
+        role: user.role,
+        username: user.username,
+        avatar: user.avatar,
+        isEmailVerified: user.isEmailVerified,
+      },
+    });
+  } catch (err) {
+    console.error("SIGNUP ERROR:", err);
+    res.status(500).json({ message: "Signup failed" });
+  }
+};
+/* ================= verifyEmail ================= */
+exports.verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const tokenHash = Token.hashToken(token);
+
+    const storedToken = await Token.findOne({
+      tokenHash,
+      type: "verify",
+      expiresAt: { $gt: new Date() },
+    });
+
+    if (!storedToken) {
+      return res.status(400).json({
+        message: "Invalid or expired link",
+      });
+    }
+
+    const user = await User.findById(storedToken.user);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.isEmailVerified = true;
+    await user.save();
+
+    await Token.deleteMany({ user: user._id, type: "verify" });
+
+    sendEmail(
+      user.email,
+      "Welcome to Void Work 🚀",
+      `
+      <div style="font-family: Arial, sans-serif; background:#f4f4f7;">
         <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;">
 
           <tr>
@@ -99,7 +268,7 @@ exports.signup = async (req, res) => {
               </p>
 
               <div style="text-align:center;margin:30px 0;">
-                <a href="${process.env.FRONTEND_URL}"
+                <a href="${process.env.CLIENT_URL}"
                   style="background:#06b6d4;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;">
                   Visit Void Work
                 </a>
@@ -126,40 +295,14 @@ exports.signup = async (req, res) => {
         </table>
       </div>
     `,
-      );
-    } catch (mailErr) {
-      console.error("WELCOME EMAIL ERROR:", mailErr);
-    }
-
-    const accessToken = signAccessToken({
-      id: user._id,
-      role: user.role,
+    ).catch((err) => {
+      console.error("WELCOME EMAIL ERROR:", err);
     });
 
-    const refreshToken = signRefreshToken({ id: user._id });
-
-    await Token.deleteMany({ user: user._id });
-
-    await Token.create({
-      user: user._id,
-      tokenHash: Token.hashToken(refreshToken),
-      expiresAt: new Date(Date.now() + COOKIE_OPTIONS.maxAge),
-    });
-
-    res.cookie("refreshToken", refreshToken, COOKIE_OPTIONS);
-
-    res.status(201).json({
-      accessToken,
-      user: {
-        id: user._id,
-        fullname: user.fullname,
-        email: user.email,
-        role: user.role,
-      },
-    });
+    res.json({ message: "Email verified successfully" });
   } catch (err) {
-    console.error("SIGNUP ERROR:", err);
-    res.status(500).json({ message: "Signup failed" });
+    console.error("VERIFY EMAIL ERROR:", err);
+    res.status(500).json({ message: "Verification failed" });
   }
 };
 
@@ -171,6 +314,12 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    if (!user.isEmailVerified) {
+      return res.status(403).json({
+        message: "Please verify your email first",
+      });
     }
 
     const match = await user.comparePassword(password);
@@ -190,6 +339,7 @@ exports.login = async (req, res) => {
     await Token.create({
       user: user._id,
       tokenHash: Token.hashToken(refreshToken),
+      type: "refresh",
       expiresAt: new Date(Date.now() + COOKIE_OPTIONS.maxAge),
     });
 
@@ -221,7 +371,10 @@ exports.refresh = async (req, res) => {
     const payload = verifyRefreshToken(token);
     const tokenHash = Token.hashToken(token);
 
-    const storedToken = await Token.findOne({ tokenHash });
+    const storedToken = await Token.findOne({
+      tokenHash,
+      type: "refresh",
+    });
     if (!storedToken) {
       return res.status(401).json({ message: "Token revoked" });
     }
@@ -234,6 +387,7 @@ exports.refresh = async (req, res) => {
     await Token.create({
       user: payload.id,
       tokenHash: Token.hashToken(newRefreshToken),
+      type: "refresh",
       expiresAt: new Date(Date.now() + COOKIE_OPTIONS.maxAge),
     });
 
@@ -293,7 +447,7 @@ exports.changePassword = async (req, res) => {
     user.password = newPassword;
     await user.save();
 
-    await Token.deleteMany({ user: user._id });
+    await Token.deleteMany({ user: user._id, type: "refresh" });
 
     // Send password change email
     try {
@@ -301,7 +455,7 @@ exports.changePassword = async (req, res) => {
         user.email,
         "Your Void Work password was changed",
         `
-        <div style="font-family: Arial, sans-serif; background:#f4f4f7; padding:40px 0;">
+        <div style="font-family: Arial, sans-serif; background:#f4f4f7;">
           <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;">
             
             <tr>
@@ -328,7 +482,7 @@ exports.changePassword = async (req, res) => {
                 </p>
 
                 <div style="text-align:center;margin:30px 0;">
-                  <a href="${process.env.FRONTEND_URL}/forgot-password"
+                  <a href="${process.env.CLIENT_URL}/forgot-password"
                      style="background:#ef4444;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;">
                     Secure Your Account
                   </a>
@@ -379,7 +533,7 @@ exports.deleteAccount = async (req, res) => {
         user.email,
         "Your Void Work account has been deleted",
         `
-        <div style="font-family: Arial, sans-serif; background:#f4f4f7; padding:40px 0;">
+        <div style="font-family: Arial, sans-serif; background:#f4f4f7;">
           <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;">
             
             <tr>
@@ -422,7 +576,7 @@ exports.deleteAccount = async (req, res) => {
       console.error("DELETE EMAIL ERROR:", mailErr);
     }
 
-    await Token.deleteMany({ user: userId });
+    await Token.deleteMany({ user: user._id, type: "refresh" });
     await Blog.deleteMany({ author: userId });
     await Comment.deleteMany({ user: userId });
     await User.findByIdAndDelete(userId);
@@ -453,11 +607,12 @@ exports.forgotPassword = async (req, res) => {
 
     const hashedToken = Token.hashToken(resetToken);
 
-    await Token.deleteMany({ user: user._id });
+    await Token.deleteMany({ user: user._id, type: "reset" });
 
     await Token.create({
       user: user._id,
       tokenHash: hashedToken,
+      type: "reset",
       expiresAt: new Date(Date.now() + 15 * 60 * 1000),
     });
 
@@ -560,6 +715,7 @@ exports.resetPassword = async (req, res) => {
 
     const storedToken = await Token.findOne({
       tokenHash,
+      type: "reset",
       expiresAt: { $gt: new Date() },
     });
 

@@ -11,5 +11,6 @@ router.post("/change-password", auth, authController.changePassword);
 router.post("/deleteaccount", auth, authController.deleteAccount);
 router.post("/forgot-password", authController.forgotPassword);
 router.post("/reset-password", authController.resetPassword);
+router.get("/verify-email/:token", authController.verifyEmail);
 
 module.exports = router;
