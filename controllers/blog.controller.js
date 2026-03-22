@@ -340,3 +340,66 @@ exports.updateCover = async (req, res) => {
     res.status(500).json({ message: "Failed to update cover" });
   }
 };
+
+/* ============= Blog Recommendation ============= */
+exports.getRecommendations = async (req, res) => {
+  try {
+    const blogId = req.params.id;
+
+    const currentBlog = await Blog.findById(blogId);
+    if (!currentBlog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    /* ================= SAME CATEGORY ================= */
+    let sameCategory = [];
+
+    if (currentBlog.category) {
+      sameCategory = await Blog.find({
+        _id: { $ne: blogId },
+        category: currentBlog.category,
+        status: "published",
+      })
+        .populate("category", "name slug")
+        .populate("author", "fullname username avatar")
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .lean();
+    }
+
+    /* ================= SAME AUTHOR ================= */
+    let sameAuthor = [];
+
+    sameAuthor = await Blog.find({
+      _id: { $ne: blogId },
+      author: currentBlog.author,
+      status: "published",
+    })
+      .populate("category", "name slug")
+      .populate("author", "fullname username avatar")
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .lean();
+
+    /* ================= FALLBACK ================= */
+    if (sameCategory.length === 0) {
+      sameCategory = await Blog.find({
+        _id: { $ne: blogId },
+        status: "published",
+      })
+        .populate("category", "name slug")
+        .populate("author", "fullname username avatar")
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .lean();
+    }
+
+    res.json({
+      sameCategory,
+      sameAuthor,
+    });
+  } catch (err) {
+    console.error("RECOMMENDATIONS ERROR:", err);
+    res.status(500).json({ message: "Failed to load recommendations" });
+  }
+};

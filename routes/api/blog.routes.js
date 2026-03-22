@@ -8,6 +8,7 @@ const upload = require("../../middlewares/upload.middleware");
 /* ================= PUBLIC ================= */
 router.get("/latest", blogController.getLatestBlogs);
 router.get("/edit/:id", auth, blogController.getBlogForEdit);
+router.get("/:id/recommendations", blogController.getRecommendations);
 router.put(
   "/:id/cover",
   auth,
