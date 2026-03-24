@@ -31,6 +31,7 @@ exports.createContact = async (req, res) => {
       });
     }
 
+    // Save to DB
     await Contact.create({
       name,
       email,
@@ -89,7 +90,7 @@ exports.createContact = async (req, res) => {
 
         </table>
       </div>
-      `
+      `,
     ).catch((err) => {
       console.error("CONTACT AUTO-REPLY ERROR:", err);
     });
@@ -98,8 +99,9 @@ exports.createContact = async (req, res) => {
       message: "Message sent successfully",
     });
   } catch (err) {
-    console.error("CREATE CONTACT ERROR:", err);
-    res.status(500).json({ message: "Failed to send message" });
+    setError(
+      err.response?.data?.message || "Failed to send message. Try again later.",
+    );
   }
 };
 
@@ -146,7 +148,7 @@ exports.markAsRead = async (req, res) => {
     const contact = await Contact.findByIdAndUpdate(
       id,
       { isRead: true },
-      { new: true }
+      { new: true },
     ).lean();
 
     if (!contact) {
