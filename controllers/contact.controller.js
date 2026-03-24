@@ -1,5 +1,7 @@
 const Contact = require("../models/Contact");
 const mongoose = require("mongoose");
+const { sendEmail } = require("../utils/mailer");
+const User = require("../models/User");
 
 /* ================= CREATE CONTACT (PUBLIC) ================= */
 exports.createContact = async (req, res) => {
@@ -34,6 +36,62 @@ exports.createContact = async (req, res) => {
       email,
       subject: subject || "",
       message,
+    });
+
+    // Send auto-reply email
+    sendEmail(
+      email,
+      "We received your message 📩",
+      `
+      <div style="font-family: Arial, sans-serif; background:#f4f4f7;">
+        <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;">
+
+          <tr>
+            <td style="padding:30px;text-align:center;background:#0f172a;color:#ffffff;">
+              <h2 style="margin:0;">Void Work</h2>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:30px;">
+              <p style="font-size:16px;color:#333;">Hi ${name},</p>
+
+              <p style="font-size:16px;color:#333;">
+                Thanks for contacting <strong>Void Work</strong> 🙌
+              </p>
+
+              <p style="font-size:15px;color:#555;">
+                We’ve received your message and will get back to you as soon as possible.
+              </p>
+
+              <div style="background:#f1f5f9;padding:15px;border-radius:6px;margin:20px 0;">
+                <p style="margin:0;font-size:14px;color:#333;"><strong>Your Message:</strong></p>
+                <p style="margin-top:10px;font-size:14px;color:#555;">${message}</p>
+              </div>
+
+              <p style="font-size:14px;color:#555;">
+                If your query is urgent, feel free to reply to this email.
+              </p>
+
+              <p style="margin-top:30px;">
+                Regards,<br/>
+                <strong>Sarvam Patel</strong><br/>
+                Void Work
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:20px;text-align:center;font-size:12px;color:#999;background:#f4f4f7;">
+              © ${new Date().getFullYear()} Void Work
+            </td>
+          </tr>
+
+        </table>
+      </div>
+      `
+    ).catch((err) => {
+      console.error("CONTACT AUTO-REPLY ERROR:", err);
     });
 
     res.status(201).json({
