@@ -157,6 +157,9 @@ ADMIN_JWT_REFRESH_SECRET=your_admin_jwt_refresh_secret
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud
 CLOUDINARY_API_KEY=your_cloudinary_key
 CLOUDINARY_API_SECRET=your_cloudinary_secret
+
+EMAIL_USER=your_email
+EMAIL_PASS=your_email_app_pass
 ```
 
 ## 🧑‍💻 Local Development
