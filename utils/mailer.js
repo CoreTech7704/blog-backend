@@ -6,7 +6,7 @@ exports.sendEmail = async (to, subject, html) => {
   try {
     const data = await resend.emails.send({
       from: "Void Work <onboarding@resend.dev>", 
-      to,
+      to: TEST_EMAIL || to,
       subject,
       html,
     });
