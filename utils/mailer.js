@@ -9,10 +9,17 @@ const transporter = nodemailer.createTransport({
 });
 
 exports.sendEmail = async (to, subject, html) => {
-  await transporter.sendMail({
-    from: `"Void Work" <${process.env.EMAIL_USER}>`,
-    to,
-    subject,
-    html,
-  });
+  try {
+    const info = await transporter.sendMail({
+      from: `"Void Work" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      html,
+    });
+
+    console.log("Email sent:", info.response);
+  } catch (error) {
+    console.error("EMAIL ERROR FULL:", error);
+    throw error;
+  }
 };
