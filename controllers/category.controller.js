@@ -47,7 +47,7 @@ exports.getBlogsByCategory = async (req, res) => {
       category: category._id,
       status: "published",
     })
-      .populate("author", "fullname avatar")
+      .populate("author", "fullname avatar cover")
       .sort({ createdAt: -1 })
       .lean();
 
